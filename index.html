@@ -4,89 +4,219 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <title>ISO27001 Analysis Requests</title>
+
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Poppins:wght@600;700;800&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=Poppins:wght@600;700;800;900&display=swap" rel="stylesheet">
+
   <link rel="stylesheet" href="styles.css">
 </head>
-<body>
-  <header class="site-header">
-    <div class="container nav-row">
-      <div>
-        <p class="brand">SecurePath Advisory</p>
-      </div>
-      <nav class="nav-links">
-        <a href="index.html" class="nav-link active">Home</a>
-        <a href="form.html" class="nav-link">Request forms</a>
-        <a href="about.html" class="nav-link">About us</a>
-      </nav>
-    </div>
-  </header>
 
-  <main class="container">
-    <section class="hero card hero-layout">
+<body>
+<header class="site-header">
+  <div class="container nav-row">
+    <a href="index.html" class="brand">
+      <span class="brand-mark" aria-hidden="true">
+        <svg viewBox="0 0 24 24" fill="none">
+          <path d="M12 3L20 6.5V11.5C20 16.5 16.6 20.4 12 21.5C7.4 20.4 4 16.5 4 11.5V6.5L12 3Z" stroke="currentColor" stroke-width="2"/>
+          <path d="M8.5 12L10.8 14.3L15.8 9.3" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+      </span>
+      SecurePath Advisory
+    </a>
+
+    <nav class="nav-links" aria-label="Main navigation">
+      <a href="index.html" class="nav-link active">
+        <svg class="nav-icon" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+          <path d="M4 11.5L12 5L20 11.5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+          <path d="M6.5 10.5V20H17.5V10.5" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/>
+          <path d="M10 20V14H14V20" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/>
+        </svg>
+        Home
+      </a>
+
+      <a href="form.html" class="nav-link">Request forms</a>
+      <a href="about.html" class="nav-link">About us</a>
+    </nav>
+  </div>
+</header>
+
+<main class="container">
+  <section class="hero card">
+    <div class="hero-layout">
       <div class="hero-copy-block">
         <p class="eyebrow">ISO27001 readiness support</p>
-        <span class="highlight-pill">Ideal for small businesses</span>
-        <h1>Start your ISO27001 analysis request in minutes.</h1>
-        <p class="hero-copy">Whether you need the documentation pack, a checklist, or a gap-analysis template, SecurePath helps you prepare a clear and structured request.</p>
+
+        <span class="highlight-pill">
+          <svg class="pill-icon" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+            <rect x="4" y="5" width="16" height="14" rx="2" stroke="currentColor" stroke-width="2"/>
+            <path d="M8 9H8.01" stroke="currentColor" stroke-width="3" stroke-linecap="round"/>
+            <path d="M12 9H12.01" stroke="currentColor" stroke-width="3" stroke-linecap="round"/>
+            <path d="M16 9H16.01" stroke="currentColor" stroke-width="3" stroke-linecap="round"/>
+            <path d="M8 13H8.01" stroke="currentColor" stroke-width="3" stroke-linecap="round"/>
+            <path d="M12 13H12.01" stroke="currentColor" stroke-width="3" stroke-linecap="round"/>
+            <path d="M16 13H16.01" stroke="currentColor" stroke-width="3" stroke-linecap="round"/>
+          </svg>
+          Ideal for small businesses
+        </span>
+
+        <h1>
+          Start your ISO27001 analysis request in minutes<span class="accent-dot">.</span>
+        </h1>
+
+        <p class="hero-copy">
+          Whether you need the documentation pack, a checklist, or a gap-analysis template, SecurePath helps you prepare a clear and structured request.
+        </p>
+
         <div class="hero-actions">
-          <a href="form.html" class="button">Go to the request form</a>
-          <a href="about.html" class="button secondary">Learn about our company</a>
-          <a href="#contact" class="button alt">Contact us</a>
+          <a href="form.html" class="button primary">
+            <svg class="button-icon" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+              <path d="M7 3H14L19 8V21H7V3Z" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/>
+              <path d="M14 3V8H19" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/>
+              <path d="M10 12H15" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+              <path d="M10 16H15" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+            </svg>
+            Go to the request form
+            <svg class="button-arrow" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+              <path d="M5 12H18" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+              <path d="M13 7L18 12L13 17" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+          </a>
+
+          <a href="about.html" class="button secondary">
+            <svg class="button-icon" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+              <path d="M4 20H20" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+              <path d="M6 20V9L12 5L18 9V20" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/>
+              <path d="M9 13H10" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"/>
+              <path d="M14 13H15" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"/>
+              <path d="M9 17H10" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"/>
+              <path d="M14 17H15" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"/>
+            </svg>
+            Learn about our company
+          </a>
+
+          <a href="#contact" class="button alt">
+            <svg class="button-icon" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+              <rect x="4" y="6" width="16" height="12" rx="2" stroke="currentColor" stroke-width="2"/>
+              <path d="M5 8L12 13L19 8" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+            Contact us
+          </a>
         </div>
       </div>
+
       <div class="hero-visual">
-        <img src="assets/lock-security.svg" alt="Illustration of a lock and shield representing IT security" class="lock-image" />
-      </div>
-    </section>
-
-    <section class="info-grid">
-      <article class="card">
-        <h2>What you can request</h2>
-        <ul>
-          <li>ISO27001 forms pack</li>
-          <li>ISMS checklist</li>
-          <li>Gap analysis template</li>
-        </ul>
-      </article>
-
-      <article class="card">
-        <h2>Why companies use this</h2>
-        <p>We help teams collect the right information up front so your ISO27001 assessment can begin with a consistent baseline and a clear scope.</p>
-      </article>
-    </section>
-
-    <section class="card info-panel">
-      <h2>What ISO27001 is and why it matters</h2>
-      <p>ISO27001 is the international standard for establishing, implementing, maintaining, and improving an information security management system (ISMS). It helps businesses protect customer data, reduce operational risk, and build trust with clients, partners, and regulators.</p>
-      <p>For many companies, the challenge is not understanding the standard — it is knowing where to start. That is why we make the intake process simple, structured, and easy to follow.</p>
-    </section>
-
-    <section class="card info-panel">
-      <h2>How we support small businesses</h2>
-      <p>Small businesses often need a practical, affordable approach to security governance. We help you focus on the controls and evidence that matter most, so you can move forward with confidence without overcomplicating the process.</p>
-      <ul>
-        <li>Clear guidance for first-time ISO27001 preparation</li>
-        <li>Simple request templates for internal and external stakeholders</li>
-        <li>Support for building a realistic, step-by-step path toward certification</li>
-      </ul>
-    </section>
-  </main>
-
-  <footer id="contact" class="site-footer">
-    <div class="container footer-grid">
-      <div>
-        <p class="footer-title">SecurePath Advisory</p>
-        <p>Helping businesses prepare for ISO27001 with clear, practical support.</p>
-      </div>
-      <div>
-        <p class="footer-title">Contact</p>
-        <p>Email: hello@securepathadvisory.com</p>
-        <p>Phone: +1 555 123 4567</p>
-        <p>Address: 12 Security Lane, Stockholm, Sweden</p>
+        <img
+                src="assets/hero-lock.png"
+                alt="3D illustration of a security lock for ISO27001 readiness"
+                class="lock-image"
+        />
       </div>
     </div>
-  </footer>
+  </section>
+
+  <section class="info-grid">
+    <article class="card">
+      <div class="section-head">
+        <div class="section-icon" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="none">
+            <path d="M7 3H14L19 8V21H7V3Z" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/>
+            <path d="M14 3V8H19" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/>
+            <path d="M9.5 13H16" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+            <path d="M9.5 17H14" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+          </svg>
+        </div>
+
+        <div class="section-head-copy">
+          <h2>What you can request</h2>
+          <div class="mini-rule"></div>
+        </div>
+      </div>
+
+      <ul>
+        <li>ISO27001 forms pack</li>
+        <li>ISMS checklist</li>
+        <li>Gap analysis template</li>
+      </ul>
+    </article>
+
+    <article class="card">
+      <div class="section-head">
+        <div class="section-icon" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="none">
+            <path d="M8 12L11 15L16 9" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            <path d="M12 3L20 6.5V11.5C20 16.5 16.6 20.4 12 21.5C7.4 20.4 4 16.5 4 11.5V6.5L12 3Z" stroke="currentColor" stroke-width="2"/>
+          </svg>
+        </div>
+
+        <div class="section-head-copy">
+          <h2>Why companies use this</h2>
+          <div class="mini-rule"></div>
+        </div>
+      </div>
+
+      <p>
+        We help teams collect the right information up front so your ISO27001 assessment can begin with a consistent baseline and a clear scope.
+      </p>
+    </article>
+  </section>
+
+  <section class="card info-panel">
+    <div class="info-panel-layout">
+      <div class="info-panel-copy">
+        <div class="section-head">
+          <div class="section-icon" aria-hidden="true">
+            <svg viewBox="0 0 24 24" fill="none">
+              <path d="M12 3L20 6.5V11.5C20 16.5 16.6 20.4 12 21.5C7.4 20.4 4 16.5 4 11.5V6.5L12 3Z" stroke="currentColor" stroke-width="2"/>
+              <path d="M9 12L11 14L15 10" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+          </div>
+
+          <div class="section-head-copy">
+            <h2>What ISO27001 is and why it matters</h2>
+            <div class="mini-rule"></div>
+          </div>
+        </div>
+
+        <p>
+          ISO27001 is the international standard for establishing, implementing, maintaining, and improving an information security management system (ISMS). It helps businesses protect customer data, reduce operational risk, and build trust with clients, partners, and regulators.
+        </p>
+
+        <p>
+          For many companies, the challenge is not understanding the standard — it is knowing where to start. That is why we make the intake process simple, structured, and easy to follow.
+        </p>
+      </div>
+
+      <div class="info-panel-visual" aria-hidden="true">
+        <div class="info-panel-badge">
+          <svg viewBox="0 0 24 24" fill="none">
+            <path d="M12 3C7.03 3 3 7.03 3 12C3 16.97 7.03 21 12 21C16.97 21 21 16.97 21 12C21 7.03 16.97 3 12 3Z" stroke="currentColor" stroke-width="1.5"/>
+            <path d="M3 12H21" stroke="currentColor" stroke-width="1.5"/>
+            <path d="M12 3C14.2 5.4 15.3 8.4 15.3 12C15.3 15.6 14.2 18.6 12 21" stroke="currentColor" stroke-width="1.5"/>
+            <path d="M12 3C9.8 5.4 8.7 8.4 8.7 12C8.7 15.6 9.8 18.6 12 21" stroke="currentColor" stroke-width="1.5"/>
+            <rect x="13.5" y="12.5" width="6" height="5.5" rx="1" fill="currentColor"/>
+            <path d="M15 12.5V11.3C15 10.3 15.7 9.5 16.5 9.5C17.3 9.5 18 10.3 18 11.3V12.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+          </svg>
+        </div>
+      </div>
+    </div>
+  </section>
+</main>
+
+<footer id="contact" class="site-footer">
+  <div class="container footer-grid">
+    <div>
+      <p class="footer-title">SecurePath Advisory</p>
+      <p>Helping businesses prepare for ISO27001 with clear, practical support.</p>
+    </div>
+
+    <div>
+      <p class="footer-title">Contact</p>
+      <p>Email: hello@securepathadvisory.com</p>
+      <p>Phone: +1 555 123 4567</p>
+      <p>Address: 12 Security Lane, Stockholm, Sweden</p>
+    </div>
+  </div>
+</footer>
 </body>
 </html>
