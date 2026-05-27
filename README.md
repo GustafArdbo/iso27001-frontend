@@ -1,4 +1,5 @@
 <<<<<<< HEAD
+<<<<<<< HEAD
 This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
 
 ## Getting Started
@@ -36,6 +37,8 @@ The easiest way to deploy your Next.js app is to use the [Vercel Platform](https
 
 Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
 =======
+=======
+>>>>>>> b4034a0afcef3f93cdd4653933d60774f0745732
 # ISO27001 Forms Request Site
 
 Minimal static site for collecting requests to receive ISO27001 analysis forms and checklists.
@@ -57,4 +60,7 @@ Then open `http://localhost:8000/` in your browser.
 - `index.html` - request form
 - `styles.css` - styles
 - `app.js` - submission handler
+<<<<<<< HEAD
+>>>>>>> b4034a0afcef3f93cdd4653933d60774f0745732
+=======
 >>>>>>> b4034a0afcef3f93cdd4653933d60774f0745732
