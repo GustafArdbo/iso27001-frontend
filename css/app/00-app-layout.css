@@ -1,0 +1,300 @@
+/* =========================
+   APP LAYOUT
+========================= */
+
+.app-body {
+    min-height: 100vh;
+    display: grid;
+    grid-template-columns: 290px minmax(0, 1fr);
+    background:
+            radial-gradient(circle at 92% 10%, rgba(58, 175, 169, 0.08), transparent 28%),
+            radial-gradient(circle at 10% 80%, rgba(58, 175, 169, 0.07), transparent 30%),
+            linear-gradient(180deg, #fffdf8 0%, var(--color-background) 100%);
+    color: var(--color-primary);
+}
+
+.app-sidebar {
+    min-height: 100vh;
+    padding: 28px 22px;
+    background: linear-gradient(180deg, var(--color-primary) 0%, #0b2538 100%);
+    color: #ffffff;
+    position: sticky;
+    top: 0;
+    display: flex;
+    flex-direction: column;
+}
+
+.app-logo {
+    display: inline-flex;
+    align-items: center;
+    margin-bottom: 34px;
+    text-decoration: none;
+}
+
+.app-logo img {
+    display: block;
+    width: 220px;
+    max-width: 220px;
+    height: auto;
+    object-fit: contain;
+}
+
+.app-nav {
+    display: grid;
+    gap: 8px;
+}
+
+.app-nav-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    min-height: 48px;
+    padding: 0 14px;
+    border-radius: 10px;
+    color: #edf6f5;
+    font-weight: 800;
+    transition: background .2s ease, color .2s ease, transform .2s ease;
+}
+
+.app-nav-item span {
+    width: 22px;
+    color: var(--color-accent);
+    font-weight: 900;
+}
+
+.app-nav-item:hover,
+.app-nav-item.active {
+    background: rgba(255,255,255,0.13);
+    transform: translateX(2px);
+}
+
+.app-sidebar-footer {
+    margin-top: auto;
+    padding-top: 24px;
+}
+
+.app-sidebar-footer a {
+    color: rgba(255,255,255,0.78);
+    font-weight: 800;
+}
+
+.app-main {
+    width: 100%;
+    max-width: 1500px;
+    margin: 0 auto;
+    padding: 42px 48px 56px;
+}
+
+.app-topbar {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 28px;
+    margin-bottom: 30px;
+}
+
+.app-topbar-actions {
+    display: flex;
+    align-items: flex-start;
+    justify-content: flex-end;
+    gap: 16px;
+    flex-shrink: 0;
+}
+
+/* Same visual height and alignment for framework select and logout */
+.app-topbar-actions select,
+.app-topbar-actions .app-logout {
+    height: 64px !important;
+    min-height: 64px !important;
+    margin: 0 !important;
+    border: 1px solid var(--color-border);
+    border-radius: 18px;
+    background-color: #ffffff;
+    color: var(--color-primary);
+    font-weight: 800;
+    font-size: 1rem;
+    box-sizing: border-box;
+}
+
+.app-topbar-actions select {
+    display: block;
+    width: 300px !important;
+    min-width: 300px !important;
+    padding: 0 52px 0 22px !important;
+    line-height: 64px;
+    appearance: none;
+    -webkit-appearance: none;
+    background-image:
+            linear-gradient(45deg, transparent 50%, var(--color-primary) 50%),
+            linear-gradient(135deg, var(--color-primary) 50%, transparent 50%);
+    background-position:
+            calc(100% - 24px) 28px,
+            calc(100% - 17px) 28px;
+    background-size: 8px 8px, 8px 8px;
+    background-repeat: no-repeat;
+}
+
+.app-topbar-actions .app-logout {
+    min-width: 160px !important;
+    padding: 0 26px !important;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    line-height: 1;
+    text-decoration: none;
+    white-space: nowrap;
+}
+
+.app-card {
+    background: rgba(255,255,255,0.94);
+    border: 1px solid rgba(18, 48, 71, 0.10);
+    border-radius: 18px;
+    padding: 26px;
+    box-shadow: 0 18px 45px rgba(18, 48, 71, 0.06);
+}
+
+.app-card-header {
+    display: flex;
+    justify-content: space-between;
+    gap: 18px;
+    align-items: flex-start;
+    margin-bottom: 22px;
+}
+
+.app-card h2 {
+    font-size: 1.18rem;
+    letter-spacing: -0.03em;
+}
+
+.app-page-grid {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 22px;
+}
+
+.app-page-grid.two {
+    grid-template-columns: 1fr 1fr;
+}
+
+.app-table-card {
+    margin-top: 22px;
+}
+
+.app-table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.app-table th,
+.app-table td {
+    padding: 16px 14px;
+    text-align: left;
+    border-bottom: 1px solid var(--color-border);
+    color: var(--color-primary);
+}
+
+.app-table th {
+    font-size: .82rem;
+    text-transform: uppercase;
+    letter-spacing: .08em;
+    color: var(--color-text-muted);
+}
+
+.app-table td {
+    font-size: .98rem;
+}
+
+.app-pill {
+    display: inline-flex;
+    align-items: center;
+    border-radius: 999px;
+    padding: 6px 10px;
+    font-size: .78rem;
+    font-weight: 900;
+}
+
+.app-pill.good {
+    background: var(--color-success-bg);
+    color: var(--color-success);
+}
+
+.app-pill.warning {
+    background: var(--color-warning-bg);
+    color: var(--color-warning);
+}
+
+.app-pill.error {
+    background: var(--color-error-bg);
+    color: var(--color-error);
+}
+
+.app-pill.info {
+    background: var(--color-info-bg);
+    color: var(--color-info);
+}
+
+.app-pill.neutral {
+    background: #eef2f7;
+    color: var(--color-text-muted);
+}
+
+.app-action {
+    color: var(--color-accent);
+    font-weight: 900;
+}
+
+@media (max-width: 1100px) {
+    .app-body {
+        grid-template-columns: 1fr;
+    }
+
+    .app-sidebar {
+        position: static;
+        min-height: auto;
+    }
+
+    .app-logo img {
+        width: 190px;
+        max-width: 190px;
+    }
+
+    .app-nav {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .app-main {
+        padding: 32px 24px 44px;
+    }
+
+    .app-page-grid,
+    .app-page-grid.two {
+        grid-template-columns: 1fr;
+    }
+
+    .app-topbar {
+        flex-direction: column;
+    }
+}
+
+@media (max-width: 620px) {
+    .app-nav {
+        grid-template-columns: 1fr;
+    }
+
+    .app-topbar-actions {
+        width: 100%;
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .app-topbar-actions select,
+    .app-topbar-actions .app-logout {
+        width: 100% !important;
+        min-width: 0 !important;
+    }
+
+    .app-table {
+        display: block;
+        overflow-x: auto;
+    }
+}

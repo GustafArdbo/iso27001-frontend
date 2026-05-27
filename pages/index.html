@@ -3,26 +3,20 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>ISOReady - ISO27001 Readiness Platform</title>
+  <title>ComplyPilot - ISO27001 Readiness Platform</title>
 
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=Poppins:wght@600;700;800;900&display=swap" rel="stylesheet">
 
-  <link rel="stylesheet" href="styles.css">
+  <link rel="stylesheet" href="../styles.css">
 </head>
 
 <body class="landing-page">
 <header class="landing-header">
   <div class="landing-container landing-nav">
-    <a href="index.html" class="landing-brand">
-      <span class="landing-logo" aria-hidden="true">
-        <svg viewBox="0 0 64 64" fill="none">
-          <path d="M32 5L53 14V28C53 42 44.2 54 32 59C19.8 54 11 42 11 28V14L32 5Z" stroke="currentColor" stroke-width="4"/>
-          <path d="M22 32L29 39L43 23" stroke="#25B8B1" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>
-        </svg>
-      </span>
-      ISOReady
+    <a href="index.html" class="landing-brand logo-brand" aria-label="ComplyPilot home">
+      <img src="../assets/complypilot-logo.png" alt="ComplyPilot logo" class="brand-logo-img">
     </a>
 
     <nav class="landing-links" aria-label="Main navigation">
@@ -30,11 +24,12 @@
       <a href="assessments.html">Assessments</a>
       <a href="pricing.html">Pricing</a>
       <a href="contact.html">Contact</a>
+      <a href="about.html">About us</a>
     </nav>
 
     <div class="landing-actions">
       <a href="form.html" class="demo-button">Book a demo</a>
-      <a href="about.html" class="login-link">Log in</a>
+      <a href="login.html" class="login-button">Log in</a>
     </div>
   </div>
 </header>
@@ -164,47 +159,17 @@
 
             <article class="dash-card">
               <h3>Controls status</h3>
-              <div class="status-row">
-                <span class="status-dot done">✓</span>
-                <span>Implemented</span>
-                <strong>93</strong>
-              </div>
-
-              <div class="status-row">
-                <span class="status-dot progress"></span>
-                <span>In progress</span>
-                <strong>24</strong>
-              </div>
-
-              <div class="status-row">
-                <span class="status-dot empty"></span>
-                <span>Not started</span>
-                <strong>12</strong>
-              </div>
-
-              <div class="total-row">
-                <span>Total controls</span>
-                <strong>129</strong>
-              </div>
+              <div class="status-row"><span class="status-dot done">✓</span><span>Implemented</span><strong>93</strong></div>
+              <div class="status-row"><span class="status-dot progress"></span><span>In progress</span><strong>24</strong></div>
+              <div class="status-row"><span class="status-dot empty"></span><span>Not started</span><strong>12</strong></div>
+              <div class="total-row"><span>Total controls</span><strong>129</strong></div>
             </article>
 
             <article class="dash-card">
               <h3>Open risks</h3>
-              <div class="risk-row">
-                <strong>7</strong>
-                <span class="high">High</span>
-              </div>
-
-              <div class="risk-row">
-                <strong>12</strong>
-                <span class="medium">Medium</span>
-              </div>
-
-              <div class="risk-row">
-                <strong>5</strong>
-                <span class="low">Low</span>
-              </div>
-
+              <div class="risk-row"><strong>7</strong><span class="high">High</span></div>
+              <div class="risk-row"><strong>12</strong><span class="medium">Medium</span></div>
+              <div class="risk-row"><strong>5</strong><span class="low">Low</span></div>
               <a href="assessments.html" class="dash-link">View risk register →</a>
             </article>
           </div>
@@ -213,35 +178,11 @@
             <article class="dash-card domains-card">
               <h3>Top control domains</h3>
 
-              <div class="bar-row">
-                <span>A.5 Information security policies</span>
-                <div><i style="width:90%"></i></div>
-                <strong>90%</strong>
-              </div>
-
-              <div class="bar-row">
-                <span>A.6 Organization of information security</span>
-                <div><i style="width:75%"></i></div>
-                <strong>75%</strong>
-              </div>
-
-              <div class="bar-row">
-                <span>A.8 Asset management</span>
-                <div><i style="width:80%"></i></div>
-                <strong>80%</strong>
-              </div>
-
-              <div class="bar-row">
-                <span>A.9 Access control</span>
-                <div><i style="width:70%"></i></div>
-                <strong>70%</strong>
-              </div>
-
-              <div class="bar-row">
-                <span>A.12 Operations security</span>
-                <div><i style="width:65%"></i></div>
-                <strong>65%</strong>
-              </div>
+              <div class="bar-row"><span>A.5 Information security policies</span><div><i style="width:90%"></i></div><strong>90%</strong></div>
+              <div class="bar-row"><span>A.6 Organization of information security</span><div><i style="width:75%"></i></div><strong>75%</strong></div>
+              <div class="bar-row"><span>A.8 Asset management</span><div><i style="width:80%"></i></div><strong>80%</strong></div>
+              <div class="bar-row"><span>A.9 Access control</span><div><i style="width:70%"></i></div><strong>70%</strong></div>
+              <div class="bar-row"><span>A.12 Operations security</span><div><i style="width:65%"></i></div><strong>65%</strong></div>
 
               <a href="platform.html" class="dash-link">View all controls →</a>
             </article>

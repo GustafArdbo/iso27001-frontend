@@ -1,0 +1,27 @@
+/* =========================
+   RISKS PAGE
+========================= */
+
+.risk-card strong {
+    display: block;
+    margin-bottom: 6px;
+    font-size: 3.4rem;
+    font-family: 'Poppins', sans-serif;
+}
+
+.risk-card span {
+    font-weight: 900;
+    color: var(--color-text-muted);
+}
+
+.high-risk strong {
+    color: var(--color-error);
+}
+
+.medium-risk strong {
+    color: var(--color-warning);
+}
+
+.low-risk strong {
+    color: var(--color-accent);
+}

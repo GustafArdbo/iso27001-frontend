@@ -1,0 +1,96 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>Assessments - ComplyPilot</title>
+    <link rel="stylesheet" href="../styles.css">
+</head>
+
+<body class="app-body">
+<aside class="app-sidebar">
+    <a href="dashboard.html" class="app-logo" aria-label="ComplyPilot dashboard">
+        <img src="../assets/complypilot-logo-blue.png" alt="ComplyPilot logo">
+    </a>
+
+    <nav class="app-nav">
+        <a href="dashboard.html" class="app-nav-item"><span>⌘</span>Overview</a>
+        <a href="controls.html" class="app-nav-item"><span>☷</span>Controls</a>
+        <a href="app-assessments.html" class="app-nav-item active"><span>☑</span>Assessments</a>
+        <a href="evidence.html" class="app-nav-item"><span>▣</span>Evidence</a>
+        <a href="risks.html" class="app-nav-item"><span>♧</span>Risks</a>
+        <a href="tasks.html" class="app-nav-item"><span>☰</span>Tasks</a>
+        <a href="reports.html" class="app-nav-item"><span>▤</span>Reports</a>
+        <a href="settings.html" class="app-nav-item"><span>⚙</span>Settings</a>
+    </nav>
+
+    <div class="app-sidebar-footer">
+        <a href="index.html">Back to website</a>
+    </div>
+</aside>
+
+<main class="app-main assessments-page">
+    <header class="app-topbar">
+        <div>
+            <p class="app-eyebrow">ISO 27001 workspace</p>
+            <h1>Assessments</h1>
+            <p>Run readiness reviews, answer questions, and track gaps.</p>
+        </div>
+
+        <div class="app-topbar-actions">
+            <select>
+                <option>ISO 27001</option>
+            </select>
+            <a href="index.html" class="app-logout">Log out</a>
+        </div>
+    </header>
+
+    <section class="app-page-grid two">
+        <article class="app-card assessment-highlight">
+            <h2>Initial ISO 27001 readiness review</h2>
+            <p>42 of 54 questions completed.</p>
+            <div class="assessment-progress"><span style="width:78%"></span></div>
+            <a href="#" class="landing-button primary assessment-button">Continue assessment</a>
+        </article>
+
+        <article class="app-card">
+            <h2>Gap score</h2>
+            <strong class="assessment-score">78%</strong>
+            <p>Your current readiness score based on completed answers.</p>
+        </article>
+    </section>
+
+    <section class="app-card app-table-card">
+        <div class="app-card-header">
+            <h2>Recent assessments</h2>
+            <a href="#" class="app-action">New assessment</a>
+        </div>
+
+        <table class="app-table">
+            <thead>
+            <tr>
+                <th>Name</th>
+                <th>Framework</th>
+                <th>Status</th>
+                <th>Progress</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr>
+                <td>Initial readiness review</td>
+                <td>ISO 27001</td>
+                <td><span class="app-pill warning">In progress</span></td>
+                <td>78%</td>
+            </tr>
+            <tr>
+                <td>Access control review</td>
+                <td>ISO 27001</td>
+                <td><span class="app-pill good">Completed</span></td>
+                <td>100%</td>
+            </tr>
+            </tbody>
+        </table>
+    </section>
+</main>
+</body>
+</html>

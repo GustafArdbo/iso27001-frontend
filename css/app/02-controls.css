@@ -1,0 +1,17 @@
+/* =========================
+   CONTROLS PAGE
+========================= */
+
+.controls-page .control-number {
+    display: block;
+    margin: 16px 0 8px;
+    font-size: 3.4rem;
+    line-height: 1;
+    color: var(--color-primary);
+    font-family: 'Poppins', sans-serif;
+}
+
+.controls-page .app-card p {
+    color: var(--color-text-muted);
+    line-height: 1.6;
+}

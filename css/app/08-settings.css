@@ -1,0 +1,22 @@
+/* =========================
+   SETTINGS PAGE
+========================= */
+
+.settings-form {
+    display: grid;
+    gap: 18px;
+    margin-top: 22px;
+}
+
+.settings-form label {
+    margin: 0;
+}
+
+.settings-form input,
+.settings-form select {
+    width: 100%;
+}
+
+.settings-form button {
+    width: fit-content;
+}

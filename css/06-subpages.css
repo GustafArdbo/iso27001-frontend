@@ -1,0 +1,88 @@
+/* =========================
+   SUBPAGES
+========================= */
+
+.subpage {
+    padding-top: 60px;
+    padding-bottom: 90px;
+}
+
+.subpage-hero {
+    max-width: 1040px;
+    margin-bottom: 36px;
+    padding: 56px 64px;
+    background: var(--color-surface);
+    border: 1px solid rgba(18, 48, 71, 0.10);
+    border-radius: 22px;
+    box-shadow: 0 26px 70px rgba(18, 48, 71, 0.08);
+}
+
+.subpage-hero h1 {
+    margin: 0 0 22px;
+    font-family: 'Poppins', sans-serif;
+    color: var(--color-primary);
+    font-size: clamp(3rem, 4.5vw, 5.4rem);
+    line-height: 1.08;
+    letter-spacing: -0.06em;
+}
+
+.subpage-hero p {
+    max-width: 780px;
+    margin: 0;
+    color: var(--color-text-muted);
+    font-size: 1.25rem;
+    line-height: 1.7;
+}
+
+.subpage-grid,
+.pricing-grid,
+.contact-layout {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 24px;
+}
+
+.contact-layout {
+    grid-template-columns: 1fr 1fr;
+}
+
+.subpage-card,
+.pricing-card {
+    padding: 34px;
+    background: var(--color-surface);
+    border: 1px solid rgba(18, 48, 71, 0.10);
+    border-radius: 18px;
+    box-shadow: 0 16px 40px rgba(18, 48, 71, 0.06);
+}
+
+.subpage-card h2,
+.pricing-card h2 {
+    margin: 0 0 14px;
+    color: var(--color-primary);
+    font-size: 1.6rem;
+    font-family: 'Poppins', sans-serif;
+}
+
+.subpage-card p,
+.pricing-card p {
+    color: var(--color-text-muted);
+    font-size: 1.05rem;
+    line-height: 1.7;
+    margin-bottom: 12px;
+}
+
+.pricing-card {
+    display: flex;
+    flex-direction: column;
+    gap: 18px;
+}
+
+.pricing-card strong {
+    font-size: 1.2rem;
+    color: var(--color-accent);
+}
+
+.pricing-card.featured {
+    border-color: rgba(58, 175, 169, 0.6);
+    box-shadow: 0 22px 60px rgba(58, 175, 169, 0.14);
+}

@@ -1,0 +1,69 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>Reports - ComplyPilot</title>
+    <link rel="stylesheet" href="../styles.css">
+</head>
+
+<body class="app-body">
+<aside class="app-sidebar">
+    <a href="dashboard.html" class="app-logo" aria-label="ComplyPilot dashboard">
+        <img src="../assets/complypilot-logo-blue.png" alt="ComplyPilot logo">
+    </a>
+
+    <nav class="app-nav">
+        <a href="dashboard.html" class="app-nav-item"><span>⌘</span>Overview</a>
+        <a href="controls.html" class="app-nav-item"><span>☷</span>Controls</a>
+        <a href="app-assessments.html" class="app-nav-item"><span>☑</span>Assessments</a>
+        <a href="evidence.html" class="app-nav-item"><span>▣</span>Evidence</a>
+        <a href="risks.html" class="app-nav-item"><span>♧</span>Risks</a>
+        <a href="tasks.html" class="app-nav-item"><span>☰</span>Tasks</a>
+        <a href="reports.html" class="app-nav-item active"><span>▤</span>Reports</a>
+        <a href="settings.html" class="app-nav-item"><span>⚙</span>Settings</a>
+    </nav>
+
+    <div class="app-sidebar-footer">
+        <a href="index.html">Back to website</a>
+    </div>
+</aside>
+
+<main class="app-main reports-page">
+    <header class="app-topbar">
+        <div>
+            <p class="app-eyebrow">ISO 27001 workspace</p>
+            <h1>Reports</h1>
+            <p>Create readiness summaries, control reports, and evidence exports.</p>
+        </div>
+
+        <div class="app-topbar-actions">
+            <select>
+                <option>ISO 27001</option>
+            </select>
+            <a href="index.html" class="app-logout">Log out</a>
+        </div>
+    </header>
+
+    <section class="app-page-grid">
+        <article class="app-card report-card">
+            <h2>Readiness report</h2>
+            <p>Export a high-level readiness summary for leadership.</p>
+            <a href="#" class="app-action">Generate →</a>
+        </article>
+
+        <article class="app-card report-card">
+            <h2>Control report</h2>
+            <p>Review implementation status across all ISO 27001 controls.</p>
+            <a href="#" class="app-action">Generate →</a>
+        </article>
+
+        <article class="app-card report-card">
+            <h2>Evidence export</h2>
+            <p>Prepare evidence packages for audit or internal review.</p>
+            <a href="#" class="app-action">Generate →</a>
+        </article>
+    </section>
+</main>
+</body>
+</html>

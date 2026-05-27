@@ -1,0 +1,14 @@
+/* =========================
+   REPORTS PAGE
+========================= */
+
+.report-card p {
+    margin: 12px 0 22px;
+    color: var(--color-text-muted);
+    line-height: 1.7;
+}
+
+.report-card .app-action {
+    display: inline-flex;
+    margin-top: auto;
+}

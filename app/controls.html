@@ -1,0 +1,111 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>Controls - ComplyPilot</title>
+    <link rel="stylesheet" href="../styles.css">
+</head>
+
+<body class="app-body">
+<aside class="app-sidebar">
+    <a href="dashboard.html" class="app-logo" aria-label="ComplyPilot dashboard">
+        <img src="../assets/complypilot-logo-blue.png" alt="ComplyPilot logo">
+    </a>
+
+    <nav class="app-nav">
+        <a href="dashboard.html" class="app-nav-item"><span>⌘</span>Overview</a>
+        <a href="controls.html" class="app-nav-item active"><span>☷</span>Controls</a>
+        <a href="app-assessments.html" class="app-nav-item"><span>☑</span>Assessments</a>
+        <a href="evidence.html" class="app-nav-item"><span>▣</span>Evidence</a>
+        <a href="risks.html" class="app-nav-item"><span>♧</span>Risks</a>
+        <a href="tasks.html" class="app-nav-item"><span>☰</span>Tasks</a>
+        <a href="reports.html" class="app-nav-item"><span>▤</span>Reports</a>
+        <a href="settings.html" class="app-nav-item"><span>⚙</span>Settings</a>
+    </nav>
+
+    <div class="app-sidebar-footer">
+        <a href="index.html">Back to website</a>
+    </div>
+</aside>
+
+<main class="app-main controls-page">
+    <header class="app-topbar">
+        <div>
+            <p class="app-eyebrow">ISO 27001 workspace</p>
+            <h1>Controls</h1>
+            <p>Manage ISO 27001 controls, ownership, status, and implementation progress.</p>
+        </div>
+
+        <div class="app-topbar-actions">
+            <select>
+                <option>ISO 27001</option>
+            </select>
+            <a href="index.html" class="app-logout">Log out</a>
+        </div>
+    </header>
+
+    <section class="app-page-grid">
+        <article class="app-card">
+            <h2>Implemented</h2>
+            <strong class="control-number">93</strong>
+            <p>Controls with evidence and owner assigned.</p>
+        </article>
+
+        <article class="app-card">
+            <h2>In progress</h2>
+            <strong class="control-number">24</strong>
+            <p>Controls currently being prepared.</p>
+        </article>
+
+        <article class="app-card">
+            <h2>Not started</h2>
+            <strong class="control-number">12</strong>
+            <p>Controls that still need planning.</p>
+        </article>
+    </section>
+
+    <section class="app-card app-table-card">
+        <div class="app-card-header">
+            <h2>Control library</h2>
+            <a href="#" class="app-action">Add control</a>
+        </div>
+
+        <table class="app-table">
+            <thead>
+            <tr>
+                <th>Control</th>
+                <th>Domain</th>
+                <th>Owner</th>
+                <th>Status</th>
+                <th>Progress</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr>
+                <td>A.5 Information security policies</td>
+                <td>Governance</td>
+                <td>Security Lead</td>
+                <td><span class="app-pill good">Implemented</span></td>
+                <td>90%</td>
+            </tr>
+            <tr>
+                <td>A.8 Asset management</td>
+                <td>Assets</td>
+                <td>IT Manager</td>
+                <td><span class="app-pill warning">In progress</span></td>
+                <td>80%</td>
+            </tr>
+            <tr>
+                <td>A.9 Access control</td>
+                <td>Access</td>
+                <td>Operations</td>
+                <td><span class="app-pill warning">In progress</span></td>
+                <td>70%</td>
+            </tr>
+            </tbody>
+        </table>
+    </section>
+</main>
+</body>
+</html>

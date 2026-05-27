@@ -1,0 +1,20 @@
+/* =========================
+   EVIDENCE PAGE
+========================= */
+
+.evidence-stat {
+    background: #e8f7f5;
+}
+
+.evidence-stat strong {
+    display: block;
+    margin-bottom: 6px;
+    font-size: 3.2rem;
+    color: var(--color-primary);
+    font-family: 'Poppins', sans-serif;
+}
+
+.evidence-stat span {
+    color: var(--color-text-muted);
+    font-weight: 900;
+}

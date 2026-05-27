@@ -1,0 +1,208 @@
+/* Responsive */
+
+@media screen and (min-width: 1501px) {
+    .hero-right {
+        transform: translateX(70px);
+    }
+}
+
+@media screen and (max-width: 1500px) {
+    .landing-container {
+        max-width: 1400px;
+        padding-left: 44px;
+        padding-right: 44px;
+    }
+
+    .landing-hero {
+        grid-template-columns: minmax(0, 1fr);
+        gap: 56px;
+    }
+
+    .hero-left {
+        max-width: 780px;
+    }
+
+    .hero-right {
+        justify-content: flex-start;
+        transform: none;
+    }
+
+    .dashboard-shell {
+        max-width: 100%;
+    }
+}
+
+@media screen and (max-width: 1100px) {
+    .container {
+        max-width: 100%;
+        padding: 20px;
+    }
+}
+
+@media screen and (max-width: 850px) {
+    .landing-nav {
+        grid-template-columns: 1fr;
+        gap: 24px;
+    }
+
+    .landing-links,
+    .landing-actions {
+        justify-content: flex-start;
+        flex-wrap: wrap;
+        gap: 20px;
+    }
+
+    .hero-left h1,
+    .hero-title {
+        font-size: 3.4rem;
+    }
+
+    .hero-title span {
+        white-space: normal;
+    }
+
+    .landing-copy {
+        font-size: 1.18rem;
+    }
+
+    .landing-button {
+        width: 100%;
+    }
+
+    .landing-feature-row,
+    .dashboard-cards,
+    .dashboard-bottom,
+    .trusted-strip,
+    .subpage-grid,
+    .pricing-grid,
+    .contact-layout,
+    .footer-grid,
+    .homepage-about-card {
+        grid-template-columns: 1fr;
+    }
+
+    .trusted-divider {
+        display: none;
+    }
+
+    .dashboard-shell {
+        grid-template-columns: 1fr;
+    }
+
+    .dashboard-sidebar {
+        display: none;
+    }
+
+    .bar-row {
+        grid-template-columns: 1fr;
+    }
+
+    .trusted-strip p {
+        padding-left: 24px;
+    }
+
+    .trusted-logos {
+        padding: 0 24px;
+        justify-content: flex-start;
+        flex-wrap: wrap;
+    }
+
+    .subpage-hero {
+        padding: 34px 28px;
+    }
+
+    .nav-row {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    .request-card {
+        padding: 24px 22px;
+    }
+
+    .request-header h1 {
+        font-size: 2.35rem;
+    }
+
+    .row {
+        grid-template-columns: 1fr;
+        gap: 0;
+    }
+
+    .actions button {
+        width: 100%;
+    }
+
+    .homepage-about {
+        margin-top: 44px;
+    }
+
+    .homepage-about-card {
+        padding: 34px 28px;
+        gap: 30px;
+    }
+
+    .homepage-about-copy h2 {
+        font-size: 2.35rem;
+    }
+
+    .homepage-about-copy p {
+        font-size: 1.04rem;
+    }
+
+    .brand-logo-img,
+    .logo-brand .brand-logo-img,
+    .landing-brand.logo-brand .brand-logo-img,
+    .brand.logo-brand .brand-logo-img {
+        width: 274px !important;
+        max-width: 274px !important;
+        max-height: 84px !important;
+    }
+
+    .site-header .brand-logo-img,
+    .site-header .brand.logo-brand .brand-logo-img {
+        width: 230px !important;
+        max-width: 230px !important;
+        max-height: 70px !important;
+    }
+}
+
+@media screen and (max-width: 560px) {
+    .landing-container {
+        padding-left: 22px;
+        padding-right: 22px;
+    }
+
+    .hero-left h1,
+    .hero-title {
+        font-size: 2.8rem;
+    }
+
+    .dashboard-main {
+        padding: 18px;
+    }
+
+    .dash-card {
+        padding: 18px;
+    }
+
+    .trusted-strip {
+        gap: 20px;
+    }
+
+    .brand-logo-img,
+    .logo-brand .brand-logo-img,
+    .landing-brand.logo-brand .brand-logo-img,
+    .brand.logo-brand .brand-logo-img {
+        width: 230px !important;
+        max-width: 230px !important;
+        max-height: 70px !important;
+    }
+
+    .site-header .brand-logo-img,
+    .site-header .brand.logo-brand .brand-logo-img {
+        width: 194px !important;
+        max-width: 194px !important;
+        max-height: 58px !important;
+    }
+}

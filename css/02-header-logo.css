@@ -1,0 +1,131 @@
+/* =========================
+   LANDING HEADER
+========================= */
+
+.landing-header {
+    padding: 36px 0 18px;
+}
+
+.landing-nav {
+    display: grid;
+    grid-template-columns: auto 1fr auto;
+    align-items: center;
+    gap: 50px;
+}
+
+.landing-brand {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    font-family: 'Poppins', sans-serif;
+    font-size: 2rem;
+    font-weight: 800;
+    letter-spacing: -0.045em;
+    color: var(--color-primary);
+}
+
+.landing-links {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 56px;
+}
+
+.landing-links a {
+    font-size: 1.14rem;
+    font-weight: 700;
+    color: var(--color-primary);
+    transition: color .2s ease;
+}
+
+.landing-links a:hover,
+.landing-links a.active-page {
+    color: var(--color-accent);
+}
+
+.landing-actions {
+    display: flex;
+    align-items: center;
+    gap: 30px;
+}
+
+.demo-button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 176px;
+    height: 58px;
+    border-radius: 7px;
+    background: linear-gradient(135deg, var(--color-accent) 0%, #2f928d 100%);
+    color: #ffffff;
+    font-size: 1.12rem;
+    font-weight: 800;
+    box-shadow: 0 16px 34px rgba(58, 175, 169, 0.24);
+    transition: transform .2s ease, box-shadow .2s ease;
+}
+
+.demo-button:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 20px 42px rgba(58, 175, 169, 0.32);
+}
+
+.login-link {
+    font-size: 1.14rem;
+    font-weight: 700;
+    color: var(--color-primary);
+}
+
+/* =========================
+   LOGOS
+========================= */
+
+.logo-brand,
+.landing-brand.logo-brand,
+.brand.logo-brand {
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: flex-start !important;
+    text-decoration: none !important;
+    line-height: 1 !important;
+    gap: 0 !important;
+    font-size: 0 !important;
+    letter-spacing: 0 !important;
+}
+
+.brand-logo-img,
+.logo-brand .brand-logo-img,
+.landing-brand.logo-brand .brand-logo-img,
+.brand.logo-brand .brand-logo-img {
+    display: block !important;
+    width: 338px !important;
+    max-width: 338px !important;
+    height: auto !important;
+    max-height: 103px !important;
+    object-fit: contain !important;
+    background: transparent !important;
+    flex: 0 0 auto !important;
+}
+
+.site-header .brand-logo-img,
+.site-header .brand.logo-brand .brand-logo-img {
+    width: 266px !important;
+    max-width: 266px !important;
+    height: auto !important;
+    max-height: 80px !important;
+}
+.login-button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    height: 58px;
+    padding: 0 8px;
+    color: var(--color-primary);
+    font-size: 1.14rem;
+    font-weight: 800;
+    transition: color .2s ease;
+}
+
+.login-button:hover,
+.login-button.active-login {
+    color: var(--color-accent);
+}

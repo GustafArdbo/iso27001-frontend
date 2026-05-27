@@ -1,0 +1,39 @@
+/* =========================
+   ASSESSMENTS PAGE
+========================= */
+
+.assessment-highlight p {
+    margin: 12px 0 20px;
+    color: var(--color-text-muted);
+}
+
+.assessment-progress {
+    height: 12px;
+    border-radius: 999px;
+    background: #e6e8eb;
+    overflow: hidden;
+    margin-bottom: 24px;
+}
+
+.assessment-progress span {
+    display: block;
+    height: 100%;
+    border-radius: inherit;
+    background: var(--color-accent);
+}
+
+.assessment-button {
+    width: fit-content;
+    min-width: 0;
+    height: 52px;
+    padding: 0 22px;
+    font-size: .98rem;
+}
+
+.assessment-score {
+    display: block;
+    margin: 18px 0 10px;
+    font-size: 4rem;
+    font-family: 'Poppins', sans-serif;
+    color: var(--color-accent);
+}

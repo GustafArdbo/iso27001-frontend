@@ -1,0 +1,146 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Book a demo - ComplyPilot</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=Poppins:wght@600;700;800;900&display=swap" rel="stylesheet">
+
+  <link rel="stylesheet" href="../styles.css">
+</head>
+
+<body>
+<header class="site-header">
+  <div class="container nav-row">
+    <a href="index.html" class="brand logo-brand" aria-label="ComplyPilot home">
+      <img src="../assets/complypilot-logo-blue.png" alt="ComplyPilot logo" class="brand-logo-img">
+    </a>
+
+    <nav class="nav-links">
+      <a href="index.html" class="nav-link">Home</a>
+      <a href="form.html" class="nav-link active">Book a demo</a>
+    </nav>
+  </div>
+</header>
+
+<main class="container">
+  <section class="card request-card">
+    <div class="request-header">
+      <p class="eyebrow">ISO27001 readiness support</p>
+      <span class="highlight-pill">
+        <svg class="pill-icon" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+          <path d="M4 5h16v14H4V5Z" stroke="currentColor" stroke-width="2"/>
+          <path d="M8 9h8M8 13h8M8 17h5" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+        </svg>
+        Request analysis material
+      </span>
+
+      <h1>Start your ISO27001 readiness request</h1>
+      <p class="hero-copy">
+        Tell us a little about your organization and we’ll send the intake material needed to begin your ISO27001 readiness or gap analysis.
+      </p>
+    </div>
+
+    <form>
+      <div class="row">
+        <label>
+          Company name
+          <input type="text" name="company" placeholder="ACME Ltd">
+        </label>
+
+        <label>
+          Contact name
+          <input type="text" name="name" placeholder="Jane Doe">
+        </label>
+      </div>
+
+      <div class="row">
+        <label>
+          Email
+          <input type="email" name="email" placeholder="security@acme.com">
+        </label>
+
+        <label>
+          Country
+          <select name="country">
+            <option>Sweden (+46)</option>
+            <option>United States (+1)</option>
+            <option>United Kingdom (+44)</option>
+            <option>Germany (+49)</option>
+            <option>Denmark (+45)</option>
+            <option>Norway (+47)</option>
+            <option>Finland (+358)</option>
+          </select>
+        </label>
+      </div>
+
+      <label>
+        Phone
+        <input type="tel" name="phone" placeholder="555 123 4567">
+      </label>
+
+      <p class="feedback">Choose a country so the email includes the international dialing code.</p>
+
+      <label>
+        Company size
+        <select name="size">
+          <option>1-10</option>
+          <option>11-50</option>
+          <option>51-200</option>
+          <option>201-500</option>
+          <option>500+</option>
+        </select>
+      </label>
+
+      <fieldset>
+        <legend>What would you like help with?</legend>
+
+        <label class="checkbox-row">
+          <input type="checkbox" name="materials" value="standard-forms">
+          ISO27001 readiness intake form
+        </label>
+
+        <label class="checkbox-row">
+          <input type="checkbox" name="materials" value="checklist">
+          ISMS preparation checklist
+        </label>
+
+        <label class="checkbox-row">
+          <input type="checkbox" name="materials" value="gap-analysis">
+          Gap analysis request template
+        </label>
+      </fieldset>
+
+      <label>
+        Message / Notes
+        <textarea name="message" placeholder="Any particular concerns or scope details?"></textarea>
+      </label>
+
+      <div class="actions">
+        <button type="submit">Request forms</button>
+        <button type="reset" class="muted">Clear</button>
+      </div>
+    </form>
+  </section>
+</main>
+
+<footer id="contact" class="site-footer">
+  <div class="container footer-grid">
+    <div>
+      <p class="footer-title">ComplyPilot</p>
+      <p>Helping businesses prepare for ISO27001 with clear, practical support.</p>
+    </div>
+
+    <div>
+      <p class="footer-title">Contact</p>
+      <p>Email: hello@complypilot.com</p>
+      <p>Phone: +1 555 123 4567</p>
+      <p>Address: 12 Security Lane, Stockholm, Sweden</p>
+    </div>
+  </div>
+</footer>
+</body>
+</html>

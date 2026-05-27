@@ -1,0 +1,29 @@
+/* =========================
+   TASKS PAGE
+========================= */
+
+.task-list-full {
+    display: grid;
+    gap: 14px;
+}
+
+.task-list-full article {
+    display: grid;
+    grid-template-columns: 24px 1fr auto;
+    gap: 14px;
+    align-items: center;
+    padding: 18px;
+    border: 1px solid var(--color-border);
+    border-radius: 14px;
+    background: #ffffff;
+}
+
+.task-list-full strong {
+    display: block;
+    margin-bottom: 4px;
+    color: var(--color-primary);
+}
+
+.task-list-full p {
+    color: var(--color-text-muted);
+}
