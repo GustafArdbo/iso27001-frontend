@@ -2,38 +2,39 @@ import type { Metadata } from "next";
 
 import "./globals.css";
 
-import "../css/01-base.css";
-import "../css/02-header-logo.css";
-import "../css/03-hero.css";
-import "../css/04-dashboard.css";
-import "../css/05-about-trusted.css";
-import "../css/06-subpages.css";
-import "../css/07-form-footer.css";
-import "../css/08-responsive.css";
+import "../styles/base/globals.css";
 
-import "../css/app/00-app-layout.css";
-import "../css/app/01-overview.css";
-import "../css/app/02-controls.css";
-import "../css/app/03-assessments.css";
-import "../css/app/04-evidence.css";
-import "../css/app/05-risks.css";
-import "../css/app/06-tasks.css";
-import "../css/app/07-reports.css";
-import "../css/app/08-settings.css";
+import "../styles/marketing/header-logo.css";
+import "../styles/marketing/hero.css";
+import "../styles/marketing/dashboard-preview.css";
+import "../styles/marketing/about-trusted.css";
+import "../styles/marketing/subpages.css";
+import "../styles/marketing/form-footer.css";
+import "../styles/marketing/responsive.css";
+
+import "../styles/dashboard/layout.css";
+import "../styles/dashboard/overview.css";
+import "../styles/dashboard/controls.css";
+import "../styles/dashboard/assessments.css";
+import "../styles/dashboard/evidence.css";
+import "../styles/dashboard/risks.css";
+import "../styles/dashboard/tasks.css";
+import "../styles/dashboard/reports.css";
+import "../styles/dashboard/settings.css";
 
 export const metadata: Metadata = {
-  title: "ComplyPilot",
-  description: "ISO 27001 readiness and compliance platform",
+    title: "ComplyPilot",
+    description: "ISO 27001 readiness and compliance platform",
 };
 
 export default function RootLayout({
-                                     children,
+                                       children,
                                    }: Readonly<{
-  children: React.ReactNode;
+    children: React.ReactNode;
 }>) {
-  return (
-      <html lang="en">
-      <body>{children}</body>
-      </html>
-  );
+    return (
+        <html lang="en">
+        <body>{children}</body>
+        </html>
+    );
 }
