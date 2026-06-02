@@ -1,24 +1,26 @@
-import { apiRequest } from "./api";
+import { apiRequest } from "@/lib/api";
 
-export type Assessment = {
-    id: string;
-    title: string;
-    status: "Not started" | "In progress" | "Completed";
-    completedQuestions: number;
-    totalQuestions: number;
-    score?: number;
+export type CreateDemoRequestPayload = {
+    company: string;
+    name: string;
+    email: string;
+    country: string;
+    phone?: string;
+    size: string;
+    message?: string;
+    materials: string[];
 };
 
-export function getAssessments(token?: string) {
-    return apiRequest<Assessment[]>("/assessments", {
-        method: "GET",
-        token,
-    });
-}
+export type DemoRequestResponse = {
+    id: string;
+};
 
-export function getAssessment(id: string, token?: string) {
-    return apiRequest<Assessment>(`/assessments/${id}`, {
-        method: "GET",
-        token,
+export async function createDemoRequest(
+    payload: CreateDemoRequestPayload
+): Promise<DemoRequestResponse> {
+    return apiRequest<DemoRequestResponse>("/demo-requests", {
+        method: "POST",
+        body: payload,
+        auth: false,
     });
 }
