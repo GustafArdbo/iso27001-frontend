@@ -1,5 +1,8 @@
-const API_BASE_URL =
-    process.env.NEXT_PUBLIC_API_BASE_URL ?? "http://localhost:8080";
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL?.replace(/\/$/, "");
+
+if (!API_BASE_URL) {
+    throw new Error("Missing NEXT_PUBLIC_API_BASE_URL");
+}
 
 type ApiOptions = {
     method?: "GET" | "POST" | "PUT" | "PATCH" | "DELETE";
@@ -13,13 +16,15 @@ export async function apiRequest<T>(
 ): Promise<T> {
     const { method = "GET", body, token } = options;
 
-    const response = await fetch(`${API_BASE_URL}${path}`, {
+    const normalizedPath = path.startsWith("/") ? path : `/${path}`;
+
+    const response = await fetch(`${API_BASE_URL}${normalizedPath}`, {
         method,
         headers: {
             "Content-Type": "application/json",
             ...(token ? { Authorization: `Bearer ${token}` } : {}),
         },
-        ...(body ? { body: JSON.stringify(body) } : {}),
+        ...(body !== undefined ? { body: JSON.stringify(body) } : {}),
     });
 
     if (!response.ok) {
@@ -30,5 +35,9 @@ export async function apiRequest<T>(
         );
     }
 
-    return response.json();
+    if (response.status === 204) {
+        return undefined as T;
+    }
+
+    return response.json() as Promise<T>;
 }

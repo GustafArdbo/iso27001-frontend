@@ -8,6 +8,7 @@ export type DemoRequestPayload = {
     phone: string;
     size: string;
     message: string;
+    materials: string[];
 };
 
 export function createDemoRequest(payload: DemoRequestPayload) {
