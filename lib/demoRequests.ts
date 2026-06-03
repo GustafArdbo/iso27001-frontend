@@ -15,5 +15,6 @@ export function createDemoRequest(payload: DemoRequestPayload) {
     return apiRequest("/demo-requests", {
         method: "POST",
         body: payload,
+        auth: false,
     });
 }
