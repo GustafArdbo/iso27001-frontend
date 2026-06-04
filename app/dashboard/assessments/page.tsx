@@ -12,7 +12,6 @@ export default function AssessmentsPage() {
                 <article className="app-card assessment-highlight">
                     <h2>Initial ISO 27001 readiness review</h2>
                     <p>42 of 54 questions completed.</p>
-
                     <div className="assessment-progress">
                         <span style={{ width: "78%" }}></span>
                     </div>
@@ -28,7 +27,9 @@ export default function AssessmentsPage() {
             <section className="app-card app-table-card">
                 <div className="app-card-header">
                     <h2>Recent assessments</h2>
-                    <span className="app-action">New assessment</span>
+                    <a href="#" className="app-action">
+                        New assessment
+                    </a>
                 </div>
 
                 <table className="app-table">
