@@ -2,6 +2,10 @@
    SETTINGS PAGE
 ========================= */
 
+.settings-page .app-page-grid {
+    align-items: start;
+}
+
 .settings-form {
     display: grid;
     gap: 18px;
@@ -9,14 +13,142 @@
 }
 
 .settings-form label {
+    display: grid;
+    gap: 8px;
     margin: 0;
+    color: var(--color-primary);
+    font-weight: 800;
 }
 
 .settings-form input,
 .settings-form select {
     width: 100%;
+    min-height: 50px;
+    padding: 0 14px;
+    border: 1px solid var(--color-border);
+    border-radius: 12px;
+    background: #ffffff;
+    color: var(--color-primary);
+    font: inherit;
+    box-sizing: border-box;
+}
+
+.settings-form input:focus,
+.settings-form select:focus,
+.team-invite-form input:focus,
+.team-invite-form select:focus {
+    outline: 3px solid rgba(58, 175, 169, 0.18);
+    border-color: var(--color-accent);
 }
 
 .settings-form button {
     width: fit-content;
+    min-height: 50px;
+    padding: 0 22px;
+    border: 0;
+    border-radius: 12px;
+    background: linear-gradient(135deg, var(--color-accent) 0%, #2f928d 100%);
+    color: #ffffff;
+    font-weight: 850;
+    cursor: pointer;
+    box-shadow: 0 14px 34px rgba(58, 175, 169, 0.18);
+}
+
+.settings-form button:hover {
+    transform: translateY(-1px);
+}
+
+/* =========================
+   TEAM INVITATION
+========================= */
+
+.settings-page .app-card-header p {
+    max-width: 760px;
+    margin-top: 8px;
+    color: var(--color-text-muted);
+    line-height: 1.6;
+}
+
+.team-invite-form {
+    display: grid;
+    gap: 18px;
+    margin-top: 22px;
+}
+
+.team-invite-form .row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 18px;
+}
+
+.team-invite-form label {
+    display: grid;
+    gap: 8px;
+    margin: 0;
+    color: var(--color-primary);
+    font-weight: 800;
+}
+
+.team-invite-form input,
+.team-invite-form select {
+    width: 100%;
+    min-height: 50px;
+    padding: 0 14px;
+    border: 1px solid var(--color-border);
+    border-radius: 12px;
+    background: #ffffff;
+    color: var(--color-primary);
+    font: inherit;
+    box-sizing: border-box;
+}
+
+.team-invite-form .actions {
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+    margin-top: 2px;
+}
+
+.team-invite-form button {
+    min-height: 50px;
+    padding: 0 22px;
+    border: 0;
+    border-radius: 12px;
+    background: linear-gradient(135deg, var(--color-accent) 0%, #2f928d 100%);
+    color: #ffffff;
+    font-weight: 850;
+    cursor: pointer;
+    box-shadow: 0 14px 34px rgba(58, 175, 169, 0.18);
+}
+
+.team-invite-form button:hover {
+    transform: translateY(-1px);
+}
+
+.team-invite-form button:disabled {
+    opacity: 0.72;
+    cursor: wait;
+    transform: none;
+}
+
+.team-invite-form .feedback {
+    margin: 0;
+    color: var(--color-accent);
+    font-weight: 800;
+    line-height: 1.5;
+}
+
+.team-invite-form .feedback.error {
+    color: var(--color-error);
+}
+
+@media (max-width: 850px) {
+    .team-invite-form .row {
+        grid-template-columns: 1fr;
+    }
+
+    .settings-form button,
+    .team-invite-form button {
+        width: 100%;
+    }
 }
