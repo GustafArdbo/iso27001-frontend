@@ -2,7 +2,7 @@
 
 import { FormEvent, useState } from "react";
 import DemoHeader from "@/components/DemoHeader";
-import { createDemoRequest } from "@/lib/demoRequests";
+import { createOrganizationApplication } from "@/lib/organizationApplications";
 
 type SubmitStatus = "idle" | "loading" | "success" | "error";
 
@@ -33,7 +33,7 @@ export default function FormPage() {
       setStatus("loading");
       setErrorMessage("");
 
-      await createDemoRequest(payload);
+      await createOrganizationApplication(payload);
 
       setStatus("success");
       form.reset();
