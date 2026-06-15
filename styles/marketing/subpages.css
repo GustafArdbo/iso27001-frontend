@@ -86,3 +86,111 @@
     border-color: rgba(58, 175, 169, 0.6);
     box-shadow: 0 22px 60px rgba(58, 175, 169, 0.14);
 }
+
+.login-card {
+    display: grid;
+    grid-template-columns: minmax(0, 440px);
+    justify-content: center;
+    gap: 22px;
+    max-width: 520px;
+    margin: 0 auto;
+    padding: 34px;
+    background: rgba(255, 255, 255, 0.94);
+    border: 1px solid rgba(18, 48, 71, 0.10);
+    border-radius: 8px;
+    box-shadow: 0 18px 45px rgba(18, 48, 71, 0.06);
+}
+
+.login-copy {
+    display: grid;
+    gap: 14px;
+}
+
+.login-copy .compliance-pill {
+    width: fit-content;
+    margin: 0;
+}
+
+.login-copy h1 {
+    margin: 0;
+    color: var(--color-primary);
+    font-size: 1.9rem;
+    line-height: 1.15;
+}
+
+.login-copy p {
+    margin: 0;
+    color: var(--color-text-muted);
+    line-height: 1.6;
+}
+
+.login-form {
+    display: grid;
+    gap: 16px;
+}
+
+.login-form label {
+    color: var(--color-primary);
+    font-weight: 850;
+}
+
+.login-form input {
+    width: 100%;
+    min-height: 54px;
+    margin-top: 8px;
+    padding: 0 14px;
+    border: 1px solid var(--color-border);
+    border-radius: 8px;
+    background: #ffffff;
+    color: var(--color-primary);
+    font: inherit;
+    box-sizing: border-box;
+}
+
+.login-form input:focus {
+    outline: 3px solid rgba(58, 175, 169, 0.18);
+    border-color: var(--color-accent);
+}
+
+.login-form button {
+    min-height: 52px;
+    padding: 0 20px;
+    border: 0;
+    border-radius: 8px;
+    background: linear-gradient(135deg, var(--color-accent) 0%, #2f928d 100%);
+    color: #ffffff;
+    font: inherit;
+    font-weight: 900;
+    cursor: pointer;
+    box-shadow: 0 14px 34px rgba(58, 175, 169, 0.18);
+}
+
+.login-form button:disabled {
+    opacity: .62;
+    cursor: not-allowed;
+    box-shadow: none;
+}
+
+.login-feedback {
+    margin: 0;
+    color: var(--color-error);
+    font-weight: 850;
+    line-height: 1.5;
+}
+
+.login-helper {
+    margin: 0;
+    color: var(--color-text-muted);
+    font-weight: 800;
+    line-height: 1.5;
+}
+
+.login-helper a {
+    color: var(--color-accent);
+    font-weight: 900;
+    text-decoration: none;
+}
+
+.login-helper a:hover {
+    text-decoration: underline;
+}

@@ -38,13 +38,43 @@ export default function LoginPage() {
       <MarketingHeader activePage="login" />
       <section className="landing-container subpage">
         <section className="login-card">
-          <div className="login-copy"><div className="compliance-pill">ComplyPilot account</div><h1>Log in to your workspace.</h1><p>Access your ISO 27001 readiness dashboard, evidence tasks, control status, and assessment progress.</p></div>
+          <div className="login-copy">
+            <div className="compliance-pill">ComplyPilot account</div>
+            <h1>Log in to your workspace.</h1>
+            <p>
+              Access your ISO 27001 readiness dashboard, evidence tasks, control
+              status, and assessment progress.
+            </p>
+          </div>
+
           <form className="login-form" onSubmit={handleSubmit}>
-            <label>Email<input type="email" name="email" placeholder="you@company.com" /></label>
-            <label>Password<input type="password" name="password" placeholder="Enter your password" /></label>
-            <button type="submit" disabled={status === "loading"}>{status === "loading" ? "Logging in..." : "Log in"}</button>
-            {message && <p className="login-helper">{message}</p>}
-            <p className="login-helper">Donâ€™t have an account yet? <Link href="/form">Book a demo</Link></p>
+            <label>
+              Email
+              <input type="email" name="email" placeholder="you@company.com" />
+            </label>
+
+            <label>
+              Password
+              <input
+                type="password"
+                name="password"
+                placeholder="Enter your password"
+              />
+            </label>
+
+            <button type="submit" disabled={status === "loading"}>
+              {status === "loading" ? "Logging in..." : "Log in"}
+            </button>
+
+            {message && (
+              <p className="login-feedback" role="status">
+                {message}
+              </p>
+            )}
+
+            <p className="login-helper">
+              Do not have an account yet? <Link href="/form">Book a demo</Link>
+            </p>
           </form>
         </section>
       </section>
