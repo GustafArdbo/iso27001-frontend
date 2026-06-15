@@ -1,59 +1,101 @@
 "use client";
 
-import { useState } from "react";
+import { FormEvent, useEffect, useState } from "react";
 import AppTopbar from "@/components/AppTopbar";
-import { createReport, type ReportType } from "@/lib/reports";
+import {
+    AppEmptyState,
+    AppErrorState,
+    AppLoadingState,
+} from "@/components/AppDataState";
+import {
+    createReport,
+    downloadReport,
+    getReports,
+    type Report,
+    type ReportFormat,
+    type ReportType,
+} from "@/lib/reports";
 
-type ReportCard = {
-    title: string;
-    description: string;
-    type: ReportType;
-};
+type PageStatus = "loading" | "ready" | "error";
 
-type Status = "idle" | "loading" | "success" | "error";
+const reportTypes: ReportType[] = ["READINESS", "CONTROL", "EVIDENCE", "RISK"];
+const reportFormats: ReportFormat[] = ["PDF", "LATEX"];
 
-const reportCards: ReportCard[] = [
-    {
-        title: "Readiness report",
-        description: "Export a high-level readiness summary for leadership.",
-        type: "READINESS",
-    },
-    {
-        title: "Control report",
-        description: "Review implementation status across all ISO 27001 controls.",
-        type: "CONTROL",
-    },
-    {
-        title: "Evidence export",
-        description: "Prepare evidence packages for audit or internal review.",
-        type: "EVIDENCE",
-    },
-];
+function getErrorMessage(error: unknown) {
+    return error instanceof Error ? error.message : "Could not load reports.";
+}
+
+function statusPill(status: Report["status"]) {
+    if (status === "READY") return "good";
+    if (status === "FAILED") return "error";
+    return "warning";
+}
+
+function formatDate(value: string) {
+    return new Intl.DateTimeFormat("en", {
+        month: "short",
+        day: "numeric",
+        year: "numeric",
+    }).format(new Date(value));
+}
 
 export default function ReportsPage() {
-    const [status, setStatus] = useState<Status>("idle");
-    const [activeType, setActiveType] = useState<ReportType | null>(null);
+    const [status, setStatus] = useState<PageStatus>("loading");
     const [message, setMessage] = useState("");
-    const [downloadUrl, setDownloadUrl] = useState("");
+    const [reports, setReports] = useState<Report[]>([]);
+    const [generating, setGenerating] = useState(false);
 
-    async function handleGenerate(type: ReportType) {
+    async function loadReports() {
         try {
             setStatus("loading");
-            setActiveType(type);
             setMessage("");
-            setDownloadUrl("");
-
-            const report = await createReport(type, "PDF");
-
-            setStatus("success");
-            setMessage("Report generated successfully.");
-            setDownloadUrl(report.downloadUrl ?? "");
+            setReports(await getReports());
+            setStatus("ready");
         } catch (error) {
             console.error(error);
+            setMessage(getErrorMessage(error));
             setStatus("error");
-            setMessage(
-                error instanceof Error ? error.message : "Could not generate report."
-            );
+        }
+    }
+
+    useEffect(() => {
+        loadReports();
+    }, []);
+
+    async function handleGenerate(event: FormEvent<HTMLFormElement>) {
+        event.preventDefault();
+
+        const formData = new FormData(event.currentTarget);
+        const type = String(formData.get("type") ?? "READINESS") as ReportType;
+        const format = String(formData.get("format") ?? "PDF") as ReportFormat;
+
+        try {
+            setGenerating(true);
+            setMessage("");
+            const report = await createReport(type, format);
+            setReports((currentReports) => [report, ...currentReports]);
+            setStatus("ready");
+        } catch (error) {
+            console.error(error);
+            setMessage(getErrorMessage(error));
+            setStatus("error");
+        } finally {
+            setGenerating(false);
+        }
+    }
+
+    async function handleDownload(report: Report) {
+        try {
+            setMessage("");
+            const { downloadUrl } = report.downloadUrl
+                ? { downloadUrl: report.downloadUrl }
+                : await downloadReport(report.id);
+
+            window.open(downloadUrl, "_blank", "noopener,noreferrer");
+        } catch (error) {
+            console.error(error);
+            setMessage(getErrorMessage(error));
+            setStatus("error");
         }
     }
 
@@ -64,45 +106,98 @@ export default function ReportsPage() {
                 description="Create readiness summaries, control reports, and evidence exports."
             />
 
-            <section className="app-page-grid">
-                {reportCards.map((card) => {
-                    const isLoading = status === "loading" && activeType === card.type;
+            {status === "loading" && <AppLoadingState title="Loading reports" />}
 
-                    return (
-                        <article className="app-card report-card" key={card.type}>
-                            <h2>{card.title}</h2>
-                            <p>{card.description}</p>
+            {status === "error" && (
+                <AppErrorState title="Could not load reports" message={message} />
+            )}
 
-                            <button
-                                type="button"
-                                className="app-action report-action-button"
-                                onClick={() => handleGenerate(card.type)}
-                                disabled={isLoading}
-                            >
-                                {isLoading ? "Generating..." : "Generate →"}
+            {status === "ready" && (
+                <>
+                    <section className="app-card">
+                        <div className="app-card-header">
+                            <h2>Generate report</h2>
+                        </div>
+                        <form className="settings-form" onSubmit={handleGenerate}>
+                            <label>
+                                Report type
+                                <select name="type" defaultValue="READINESS">
+                                    {reportTypes.map((type) => (
+                                        <option key={type} value={type}>
+                                            {type}
+                                        </option>
+                                    ))}
+                                </select>
+                            </label>
+                            <label>
+                                Format
+                                <select name="format" defaultValue="PDF">
+                                    {reportFormats.map((format) => (
+                                        <option key={format} value={format}>
+                                            {format}
+                                        </option>
+                                    ))}
+                                </select>
+                            </label>
+                            <button type="submit" disabled={generating}>
+                                {generating ? "Generating..." : "Generate report"}
                             </button>
-                        </article>
-                    );
-                })}
-            </section>
+                        </form>
+                    </section>
 
-            {message && (
-                <section className="app-card app-table-card report-status-card">
-                    <p className={status === "error" ? "report-error" : "report-success"}>
-                        {message}
-                    </p>
-
-                    {downloadUrl && (
-                        <a
-                            href={downloadUrl}
-                            className="landing-button primary app-small-button"
-                            target="_blank"
-                            rel="noreferrer"
-                        >
-                            Download report
-                        </a>
+                    {!reports.length ? (
+                        <AppEmptyState
+                            title="No reports"
+                            message="Generated reports will appear here."
+                        />
+                    ) : (
+                        <section className="app-card app-table-card">
+                            <div className="app-card-header">
+                                <h2>Reports</h2>
+                            </div>
+                            <table className="app-table">
+                                <thead>
+                                    <tr>
+                                        <th>Title</th>
+                                        <th>Type</th>
+                                        <th>Format</th>
+                                        <th>Status</th>
+                                        <th>Created</th>
+                                        <th>Download</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {reports.map((report) => (
+                                        <tr key={report.id}>
+                                            <td>{report.title}</td>
+                                            <td>{report.type}</td>
+                                            <td>{report.format}</td>
+                                            <td>
+                                                <span className={`app-pill ${statusPill(report.status)}`}>
+                                                    {report.status}
+                                                </span>
+                                            </td>
+                                            <td>{formatDate(report.createdAt)}</td>
+                                            <td>
+                                                {report.status === "READY" ? (
+                                                    <button
+                                                        type="button"
+                                                        className="report-link-button"
+                                                        onClick={() => handleDownload(report)}
+                                                    >
+                                                        Download
+                                                    </button>
+                                                ) : (
+                                                    <span className="app-muted-text">Unavailable</span>
+                                                )}
+                                            </td>
+                                        </tr>
+                                    ))}
+                                </tbody>
+                            </table>
+                        </section>
                     )}
-                </section>
+                </>
             )}
         </main>
     );

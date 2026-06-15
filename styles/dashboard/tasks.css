@@ -9,7 +9,7 @@
 
 .task-list-full article {
     display: grid;
-    grid-template-columns: 24px 1fr auto;
+    grid-template-columns: 24px 1fr auto 160px;
     gap: 14px;
     align-items: center;
     padding: 18px;
@@ -26,4 +26,27 @@
 
 .task-list-full p {
     color: var(--color-text-muted);
+}
+
+.task-list-full select {
+    min-height: 42px;
+    padding: 0 12px;
+    border: 1px solid var(--color-border);
+    border-radius: 10px;
+    background: #ffffff;
+    color: var(--color-primary);
+    font: inherit;
+    font-weight: 800;
+}
+
+@media (max-width: 850px) {
+    .task-list-full article {
+        grid-template-columns: 24px 1fr;
+    }
+
+    .task-list-full select,
+    .task-list-full .app-pill {
+        grid-column: 2;
+        width: fit-content;
+    }
 }

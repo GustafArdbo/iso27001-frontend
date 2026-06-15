@@ -243,6 +243,33 @@
     font-weight: 900;
 }
 
+.app-muted-text {
+    margin: 0;
+    color: var(--color-text-muted);
+    line-height: 1.6;
+}
+
+.app-state-card {
+    display: grid;
+    gap: 8px;
+    margin-top: 22px;
+}
+
+.app-state-card h2 {
+    margin: 0;
+}
+
+.app-state-card p {
+    margin: 0;
+    color: var(--color-text-muted);
+    line-height: 1.6;
+}
+
+.app-state-error p {
+    color: var(--color-error);
+    font-weight: 850;
+}
+
 @media (max-width: 1100px) {
     .app-body {
         grid-template-columns: 1fr;
