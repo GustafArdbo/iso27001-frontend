@@ -1,5 +1,5 @@
 import { apiRequest } from "./api";
-import { createClient } from "./supabase/client";
+import { createClient, getSupabaseUrl } from "./supabase/client";
 
 export type MembershipRole = "OWNER" | "ADMIN" | "AUDITOR" | "MEMBER" | "VIEWER";
 
@@ -85,9 +85,27 @@ export async function signInWithPassword(
     payload: LoginPayload
 ): Promise<SupabaseLoginResponse> {
     const supabase = createClient();
-    const { data, error } = await supabase.auth.signInWithPassword(payload);
+    let signInResult: Awaited<ReturnType<typeof supabase.auth.signInWithPassword>>;
+
+    try {
+        signInResult = await supabase.auth.signInWithPassword(payload);
+    } catch (error) {
+        const reason = error instanceof Error ? error.message : "network error";
+
+        throw new Error(
+            `Could not reach Supabase Auth at ${getSupabaseUrl()}. Check NEXT_PUBLIC_SUPABASE_URL in Vercel and redeploy. Original error: ${reason}`
+        );
+    }
+
+    const { data, error } = signInResult;
 
     if (error) {
+        if (error.message.toLowerCase().includes("failed to fetch")) {
+            throw new Error(
+                `Could not reach Supabase Auth at ${getSupabaseUrl()}. Check NEXT_PUBLIC_SUPABASE_URL in Vercel and redeploy.`
+            );
+        }
+
         throw new Error(error.message);
     }
 
