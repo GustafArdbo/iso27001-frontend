@@ -4,11 +4,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { FormEvent, useState } from "react";
 import { useRouter } from "next/navigation";
-import {
-    logout,
-    signInWithPassword,
-} from "@/lib/auth";
-import { isPlatformAdminUserId } from "@/lib/adminAccess";
+import { signInWithPassword } from "@/lib/auth";
 
 export default function AdminLoginPage() {
     const router = useRouter();
@@ -24,19 +20,10 @@ export default function AdminLoginPage() {
             setStatus("loading");
             setMessage("");
 
-            const result = await signInWithPassword({
+            await signInWithPassword({
                 email: String(formData.get("email") ?? ""),
                 password: String(formData.get("password") ?? ""),
             });
-
-            if (!isPlatformAdminUserId(result.user.id)) {
-                await logout(result.accessToken);
-                setStatus("error");
-                setMessage(
-                    `This Supabase user is not configured as a platform admin. User ID: ${result.user.id}`
-                );
-                return;
-            }
 
             router.push("/admin/onboarding");
         } catch (error) {

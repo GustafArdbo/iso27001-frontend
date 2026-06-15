@@ -43,16 +43,6 @@ export type LoginPayload = {
     password: string;
 };
 
-export type LoginResponse = {
-    accessToken: string;
-    user: {
-        id: string;
-        email: string;
-        name?: string;
-    };
-    authUser: AuthUserResponse;
-};
-
 export type SupabaseLoginResponse = {
     accessToken: string;
     user: {
@@ -121,17 +111,6 @@ export async function signInWithPassword(
             id: data.user.id,
             email: data.user.email ?? payload.email,
         },
-    };
-}
-
-export async function login(payload: LoginPayload): Promise<LoginResponse> {
-    const session = await signInWithPassword(payload);
-    const authUser = await getCurrentAuthUser(session.accessToken);
-
-    return {
-        accessToken: session.accessToken,
-        authUser,
-        user: session.user,
     };
 }
 
