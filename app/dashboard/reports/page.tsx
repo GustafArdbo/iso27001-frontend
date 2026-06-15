@@ -14,7 +14,6 @@ import {
     downloadReportFile,
     getReports,
     type Report,
-    type ReportDownloadFormat,
     type ReportType,
 } from "@/lib/reports";
 
@@ -25,8 +24,7 @@ type ReportCard = {
     title: string;
     description: string;
     type: ReportType;
-    pdfFilename: string;
-    latexFilename: string;
+    filename: string;
 };
 
 const reportCards: ReportCard[] = [
@@ -35,24 +33,21 @@ const reportCards: ReportCard[] = [
         description:
             "Prepare an evidence export for audit review and internal documentation.",
         type: "EVIDENCE_EXPORT",
-        pdfFilename: "evidence-report.pdf",
-        latexFilename: "evidence-report.tex",
+        filename: "evidence-report.pdf",
     },
     {
         title: "Control",
         description:
             "Generate a control report showing implementation status and gaps.",
         type: "CONTROL",
-        pdfFilename: "control-report.pdf",
-        latexFilename: "control-report.tex",
+        filename: "control-report.pdf",
     },
     {
         title: "Readiness",
         description:
             "Create a readiness summary for leadership and audit preparation.",
         type: "READINESS",
-        pdfFilename: "readiness-report.pdf",
-        latexFilename: "readiness-report.tex",
+        filename: "readiness-report.pdf",
     },
 ];
 
@@ -82,9 +77,6 @@ export default function ReportsPage() {
     const [organizationId, setOrganizationId] = useState("");
     const [assessmentId, setAssessmentId] = useState("");
     const [loadingKey, setLoadingKey] = useState("");
-    const [selectedFormats, setSelectedFormats] = useState<
-        Partial<Record<ReportType, ReportDownloadFormat>>
-    >({});
 
     async function loadReportsPage() {
         try {
@@ -130,21 +122,11 @@ export default function ReportsPage() {
         setReports(currentReports);
     }
 
-    async function handleGenerate(
-        card: ReportCard,
-        format: ReportDownloadFormat
-    ) {
-        const nextLoadingKey = `${card.type}-${format}`;
-
+    async function handleGenerate(card: ReportCard) {
         try {
             setActionStatus("loading");
-            setLoadingKey(nextLoadingKey);
+            setLoadingKey(card.type);
             setMessage("");
-
-            setSelectedFormats((current) => ({
-                ...current,
-                [card.type]: format,
-            }));
 
             if (!organizationId) {
                 throw new Error("No organization selected.");
@@ -159,16 +141,12 @@ export default function ReportsPage() {
                 assessmentId,
             });
 
-            await downloadReportFile(
-                report.id,
-                format,
-                format === "PDF" ? card.pdfFilename : card.latexFilename
-            );
+            await downloadReportFile(report.id, "PDF", card.filename);
 
             await refreshReports();
 
             setActionStatus("success");
-            setMessage(`${card.title} report generated as ${format}.`);
+            setMessage(`${card.title} report generated as PDF.`);
         } catch (error) {
             console.error(error);
             setActionStatus("error");
@@ -178,27 +156,18 @@ export default function ReportsPage() {
         }
     }
 
-    async function handleDownloadExisting(
-        report: Report,
-        format: ReportDownloadFormat
-    ) {
-        const nextLoadingKey = `${report.id}-${format}`;
-
+    async function handleDownloadExisting(report: Report) {
         try {
             setActionStatus("loading");
-            setLoadingKey(nextLoadingKey);
+            setLoadingKey(report.id);
             setMessage("");
 
             const label = getReportLabel(report.type).toLowerCase();
 
-            await downloadReportFile(
-                report.id,
-                format,
-                format === "PDF" ? `${label}-report.pdf` : `${label}-report.tex`
-            );
+            await downloadReportFile(report.id, "PDF", `${label}-report.pdf`);
 
             setActionStatus("success");
-            setMessage(`${getReportLabel(report.type)} report downloaded as ${format}.`);
+            setMessage(`${getReportLabel(report.type)} report downloaded as PDF.`);
         } catch (error) {
             console.error(error);
             setActionStatus("error");
@@ -240,46 +209,23 @@ export default function ReportsPage() {
             />
 
             <section className="report-card-grid">
-                {reportCards.map((card) => {
-                    const selectedFormat = selectedFormats[card.type];
+                {reportCards.map((card) => (
+                    <article className="app-card report-option-card" key={card.type}>
+                        <div>
+                            <h2>{card.title}</h2>
+                            <p>{card.description}</p>
+                        </div>
 
-                    return (
-                        <article className="app-card report-option-card" key={card.type}>
-                            <div>
-                                <h2>{card.title}</h2>
-                                <p>{card.description}</p>
-                            </div>
-
-                            <div className="report-format-actions">
-                                <button
-                                    type="button"
-                                    className={`report-format-button ${
-                                        selectedFormat === "PDF" ? "selected" : ""
-                                    }`}
-                                    onClick={() => handleGenerate(card, "PDF")}
-                                    disabled={actionStatus === "loading"}
-                                >
-                                    {loadingKey === `${card.type}-PDF`
-                                        ? "Generating..."
-                                        : "Get PDF"}
-                                </button>
-
-                                <button
-                                    type="button"
-                                    className={`report-format-button ${
-                                        selectedFormat === "LATEX" ? "selected" : ""
-                                    }`}
-                                    onClick={() => handleGenerate(card, "LATEX")}
-                                    disabled={actionStatus === "loading"}
-                                >
-                                    {loadingKey === `${card.type}-LATEX`
-                                        ? "Generating..."
-                                        : "Write LaTeX"}
-                                </button>
-                            </div>
-                        </article>
-                    );
-                })}
+                        <button
+                            type="button"
+                            className="report-generate-button"
+                            onClick={() => handleGenerate(card)}
+                            disabled={actionStatus === "loading"}
+                        >
+                            {loadingKey === card.type ? "Generating..." : "Generate report"}
+                        </button>
+                    </article>
+                ))}
             </section>
 
             {message && (
@@ -328,33 +274,14 @@ export default function ReportsPage() {
                                     <td>{formatDate(report.createdAt)}</td>
                                     <td>
                                         {report.status === "READY" ? (
-                                            <div className="report-table-actions">
-                                                <button
-                                                    type="button"
-                                                    className="report-table-button"
-                                                    onClick={() =>
-                                                        handleDownloadExisting(report, "PDF")
-                                                    }
-                                                    disabled={actionStatus === "loading"}
-                                                >
-                                                    {loadingKey === `${report.id}-PDF`
-                                                        ? "..."
-                                                        : "PDF"}
-                                                </button>
-
-                                                <button
-                                                    type="button"
-                                                    className="report-table-button"
-                                                    onClick={() =>
-                                                        handleDownloadExisting(report, "LATEX")
-                                                    }
-                                                    disabled={actionStatus === "loading"}
-                                                >
-                                                    {loadingKey === `${report.id}-LATEX`
-                                                        ? "..."
-                                                        : "LaTeX"}
-                                                </button>
-                                            </div>
+                                            <button
+                                                type="button"
+                                                className="report-table-button"
+                                                onClick={() => handleDownloadExisting(report)}
+                                                disabled={actionStatus === "loading"}
+                                            >
+                                                {loadingKey === report.id ? "..." : "Download PDF"}
+                                            </button>
                                         ) : (
                                             <span className="app-muted-text">Unavailable</span>
                                         )}
