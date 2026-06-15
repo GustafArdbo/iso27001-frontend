@@ -1,33 +1,13 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import { getCurrentAuthUser } from "@/lib/auth";
-import { getOrganization } from "@/lib/organizations";
+import { useDashboardContext } from "@/components/DashboardContext";
 
 export default function OrganizationName() {
-    const [organizationName, setOrganizationName] = useState("Workspace");
+    const { organizationName } = useDashboardContext();
 
-    useEffect(() => {
-        async function loadOrganizationName() {
-            try {
-                const me = await getCurrentAuthUser();
-                const firstMembership = me.memberships?.[0];
-
-                if (!firstMembership?.organizationId) {
-                    setOrganizationName("Workspace");
-                    return;
-                }
-
-                const organization = await getOrganization(firstMembership.organizationId);
-                setOrganizationName(organization.name);
-            } catch (error) {
-                console.error(error);
-                setOrganizationName("Workspace");
-            }
-        }
-
-        void loadOrganizationName();
-    }, []);
+    if (!organizationName) {
+        return null;
+    }
 
     return <span>{organizationName}</span>;
 }
