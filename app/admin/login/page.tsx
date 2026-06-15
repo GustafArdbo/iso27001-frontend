@@ -4,7 +4,15 @@ import Image from "next/image";
 import Link from "next/link";
 import { FormEvent, useState } from "react";
 import { useRouter } from "next/navigation";
-import { login, logout } from "@/lib/auth";
+import {
+    getCurrentAuthUser,
+    logout,
+    signInWithPassword,
+} from "@/lib/auth";
+import {
+    getAdminApiAccessMessage,
+    isPlatformAdminUserId,
+} from "@/lib/adminAccess";
 
 export default function AdminLoginPage() {
     const router = useRouter();
@@ -20,15 +28,26 @@ export default function AdminLoginPage() {
             setStatus("loading");
             setMessage("");
 
-            const result = await login({
+            const result = await signInWithPassword({
                 email: String(formData.get("email") ?? ""),
                 password: String(formData.get("password") ?? ""),
             });
 
-            if (!result.authUser.platformAdmin) {
+            if (!isPlatformAdminUserId(result.user.id)) {
                 await logout(result.accessToken);
                 setStatus("error");
-                setMessage("This account does not have platform admin access.");
+                setMessage(
+                    `This Supabase user is not configured as a platform admin. User ID: ${result.user.id}`
+                );
+                return;
+            }
+
+            const authUser = await getCurrentAuthUser(result.accessToken);
+
+            if (!authUser.platformAdmin) {
+                await logout(result.accessToken);
+                setStatus("error");
+                setMessage(getAdminApiAccessMessage());
                 return;
             }
 
@@ -37,7 +56,9 @@ export default function AdminLoginPage() {
             console.error(error);
             setStatus("error");
             setMessage(
-                error instanceof Error ? error.message : "Could not log in."
+                error instanceof Error
+                    ? error.message
+                    : "Could not log in. Check Supabase credentials and backend API access."
             );
         }
     }

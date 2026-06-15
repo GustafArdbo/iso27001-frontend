@@ -53,6 +53,15 @@ export type LoginResponse = {
     authUser: AuthUserResponse;
 };
 
+export type SupabaseLoginResponse = {
+    accessToken: string;
+    user: {
+        id: string;
+        email: string;
+        name?: string;
+    };
+};
+
 type RevocationPayload = {
     reason?: string;
 };
@@ -72,7 +81,9 @@ export function getCurrentAuthUser(token?: string) {
     });
 }
 
-export async function login(payload: LoginPayload): Promise<LoginResponse> {
+export async function signInWithPassword(
+    payload: LoginPayload
+): Promise<SupabaseLoginResponse> {
     const supabase = createClient();
     const { data, error } = await supabase.auth.signInWithPassword(payload);
 
@@ -86,15 +97,23 @@ export async function login(payload: LoginPayload): Promise<LoginResponse> {
         throw new Error("No Supabase session was returned.");
     }
 
-    const authUser = await getCurrentAuthUser(accessToken);
-
     return {
         accessToken,
-        authUser,
         user: {
             id: data.user.id,
-            email: data.user.email ?? authUser.email,
+            email: data.user.email ?? payload.email,
         },
+    };
+}
+
+export async function login(payload: LoginPayload): Promise<LoginResponse> {
+    const session = await signInWithPassword(payload);
+    const authUser = await getCurrentAuthUser(session.accessToken);
+
+    return {
+        accessToken: session.accessToken,
+        authUser,
+        user: session.user,
     };
 }
 

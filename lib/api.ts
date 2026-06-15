@@ -48,14 +48,24 @@ export async function apiRequest<T>(
         accessToken = session?.access_token;
     }
 
-    const response = await fetch(`${API_BASE_URL}${requestPath}`, {
-        method,
-        headers: {
-            "Content-Type": "application/json",
-            ...(accessToken ? { Authorization: `Bearer ${accessToken}` } : {}),
-        },
-        ...(body !== undefined ? { body: JSON.stringify(body) } : {}),
-    });
+    let response: Response;
+
+    try {
+        response = await fetch(`${API_BASE_URL}${requestPath}`, {
+            method,
+            headers: {
+                "Content-Type": "application/json",
+                ...(accessToken ? { Authorization: `Bearer ${accessToken}` } : {}),
+            },
+            ...(body !== undefined ? { body: JSON.stringify(body) } : {}),
+        });
+    } catch (error) {
+        const reason = error instanceof Error ? error.message : "network error";
+
+        throw new Error(
+            `Could not reach the backend API at ${API_BASE_URL}. Check that the backend is running and that CORS allows this frontend origin. Original error: ${reason}`
+        );
+    }
 
     if (!response.ok) {
         const errorText = await response.text();
