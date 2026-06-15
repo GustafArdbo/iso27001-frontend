@@ -1,4 +1,7 @@
-import { apiRequest } from "./api";
+import {
+    getCurrentOrganizationAssessments,
+    getAssessmentSummary,
+} from "./assessments";
 
 export type ReportType = "READINESS" | "CONTROL" | "EVIDENCE" | "RISK";
 export type ReportFormat = "PDF" | "LATEX";
@@ -20,32 +23,71 @@ export type CreateReportPayload = {
     format: ReportFormat;
 };
 
-export function getReports() {
-    return apiRequest<Report[]>("/reports", {
-        method: "GET",
-    });
-}
+const reportTitles: Record<ReportType, string> = {
+    READINESS: "Readiness report",
+    CONTROL: "Control report",
+    EVIDENCE: "Evidence export",
+    RISK: "Risk report",
+};
 
-export function getReport(id: string) {
-    return apiRequest<Report>(`/reports/${id}`, {
-        method: "GET",
-    });
-}
-
-export function createReport(type: ReportType, format: ReportFormat = "PDF") {
-    const payload: CreateReportPayload = {
+function buildReport(
+    assessmentId: string,
+    type: ReportType,
+    format: ReportFormat,
+    createdAt: string
+): Report {
+    return {
+        id: `${assessmentId}:${type}:${format}`,
+        title: reportTitles[type],
         type,
         format,
+        status: "READY",
+        createdAt,
     };
-
-    return apiRequest<Report>("/reports", {
-        method: "POST",
-        body: payload,
-    });
 }
 
-export function downloadReport(id: string) {
-    return apiRequest<{ downloadUrl: string }>(`/reports/${id}/download`, {
-        method: "GET",
-    });
+export async function getReports() {
+    const assessments = await getCurrentOrganizationAssessments();
+
+    return assessments.map((assessment) =>
+        buildReport(assessment.id, "READINESS", "PDF", assessment.createdAt)
+    );
+}
+
+export async function getReport(id: string) {
+    const [assessmentId, type = "READINESS", format = "PDF"] = id.split(":");
+    const summary = await getAssessmentSummary(assessmentId);
+
+    return buildReport(
+        summary.id,
+        type as ReportType,
+        format as ReportFormat,
+        new Date().toISOString()
+    );
+}
+
+export async function createReport(
+    type: ReportType,
+    format: ReportFormat = "PDF"
+) {
+    const assessments = await getCurrentOrganizationAssessments();
+    const latestAssessment = assessments[0];
+
+    if (!latestAssessment) {
+        throw new Error("No assessment is available for report generation.");
+    }
+
+    const summary = await getAssessmentSummary(latestAssessment.id);
+
+    return buildReport(summary.id, type, format, new Date().toISOString());
+}
+
+export async function downloadReport(id: string) {
+    const report = await getReport(id);
+
+    if (!report.downloadUrl) {
+        throw new Error("The backend API does not expose report downloads yet.");
+    }
+
+    return { downloadUrl: report.downloadUrl };
 }

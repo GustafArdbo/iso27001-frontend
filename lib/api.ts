@@ -9,6 +9,7 @@ if (!API_BASE_URL) {
 type ApiOptions = {
     method?: "GET" | "POST" | "PUT" | "PATCH" | "DELETE";
     body?: unknown;
+    query?: Record<string, string | number | boolean | null | undefined>;
     token?: string;
     auth?: boolean;
 };
@@ -17,9 +18,23 @@ export async function apiRequest<T>(
     path: string,
     options: ApiOptions = {}
 ): Promise<T> {
-    const { method = "GET", body, token, auth = true } = options;
+    const { method = "GET", body, query, token, auth = true } = options;
 
     const normalizedPath = path.startsWith("/") ? path : `/${path}`;
+    const searchParams = new URLSearchParams();
+
+    if (query) {
+        Object.entries(query).forEach(([key, value]) => {
+            if (value !== undefined && value !== null && value !== "") {
+                searchParams.set(key, String(value));
+            }
+        });
+    }
+
+    const queryString = searchParams.toString();
+    const requestPath = queryString
+        ? `${normalizedPath}?${queryString}`
+        : normalizedPath;
 
     let accessToken = token;
 
@@ -33,7 +48,7 @@ export async function apiRequest<T>(
         accessToken = session?.access_token;
     }
 
-    const response = await fetch(`${API_BASE_URL}${normalizedPath}`, {
+    const response = await fetch(`${API_BASE_URL}${requestPath}`, {
         method,
         headers: {
             "Content-Type": "application/json",
@@ -54,5 +69,11 @@ export async function apiRequest<T>(
         return undefined as T;
     }
 
-    return response.json() as Promise<T>;
+    const text = await response.text();
+
+    if (!text) {
+        return undefined as T;
+    }
+
+    return JSON.parse(text) as T;
 }

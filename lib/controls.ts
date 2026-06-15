@@ -1,24 +1,48 @@
 import { apiRequest } from "./api";
 
-export type Control = {
+export type ControlDomain =
+    | "ORGANIZATIONAL"
+    | "PEOPLE"
+    | "PHYSICAL"
+    | "TECHNOLOGICAL";
+
+export type ControlResponse = {
     id: string;
-    code: string;
+    domain: ControlDomain;
     title: string;
-    domain: string;
-    owner: string;
-    status: "Implemented" | "In progress" | "Not started";
-    progress: number;
+    question: string;
+    sortOrder: number;
 };
 
-export function getControls(token?: string) {
-    return apiRequest<Control[]>("/controls", {
+export type Control = ControlResponse;
+
+function isControlDomain(value: string | undefined): value is ControlDomain {
+    return (
+        value === "ORGANIZATIONAL" ||
+        value === "PEOPLE" ||
+        value === "PHYSICAL" ||
+        value === "TECHNOLOGICAL"
+    );
+}
+
+export function getControls(token?: string): Promise<ControlResponse[]>;
+export function getControls(
+    domain?: ControlDomain,
+    token?: string
+): Promise<ControlResponse[]>;
+export function getControls(domainOrToken?: ControlDomain | string, token?: string) {
+    const domain = isControlDomain(domainOrToken) ? domainOrToken : undefined;
+    const accessToken = domain ? token : domainOrToken ?? token;
+
+    return apiRequest<ControlResponse[]>("/controls", {
         method: "GET",
-        token,
+        query: { domain },
+        token: accessToken,
     });
 }
 
 export function getControl(id: string, token?: string) {
-    return apiRequest<Control>(`/controls/${id}`, {
+    return apiRequest<ControlResponse>(`/controls/${encodeURIComponent(id)}`, {
         method: "GET",
         token,
     });

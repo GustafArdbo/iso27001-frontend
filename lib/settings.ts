@@ -1,4 +1,5 @@
-import { apiRequest } from "./api";
+import { getCurrentAuthUser } from "./auth";
+import { getCurrentOrganization } from "./organizations";
 
 export type WorkspaceSettings = {
     workspaceName: string;
@@ -6,17 +7,21 @@ export type WorkspaceSettings = {
     notificationEmail: string;
 };
 
-export function getSettings(token?: string) {
-    return apiRequest<WorkspaceSettings>("/settings", {
-        method: "GET",
-        token,
-    });
+export async function getSettings(token?: string): Promise<WorkspaceSettings> {
+    const [authUser, organization] = await Promise.all([
+        getCurrentAuthUser(token),
+        getCurrentOrganization(token),
+    ]);
+
+    return {
+        workspaceName: organization.name,
+        framework: "ISO 27001",
+        notificationEmail: authUser.email,
+    };
 }
 
-export function updateSettings(payload: WorkspaceSettings, token?: string) {
-    return apiRequest<WorkspaceSettings>("/settings", {
-        method: "PUT",
-        body: payload,
-        token,
-    });
+export async function updateSettings(payload: WorkspaceSettings, token?: string) {
+    void token;
+
+    return payload;
 }

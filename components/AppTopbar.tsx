@@ -1,4 +1,7 @@
-import Link from "next/link";
+"use client";
+
+import { useRouter } from "next/navigation";
+import { logout } from "@/lib/auth";
 
 type AppTopbarProps = {
   title: string;
@@ -11,6 +14,13 @@ export default function AppTopbar({
   description,
   frameworkOptions = ["ISO 27001"],
 }: AppTopbarProps) {
+  const router = useRouter();
+
+  async function handleLogout() {
+    await logout();
+    router.push("/");
+  }
+
   return (
     <header className="app-topbar">
       <div>
@@ -26,9 +36,9 @@ export default function AppTopbar({
           ))}
         </select>
 
-        <Link href="/" className="app-logout">
+        <button type="button" className="app-logout" onClick={handleLogout}>
           Log out
-        </Link>
+        </button>
       </div>
     </header>
   );

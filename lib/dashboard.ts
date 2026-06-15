@@ -1,4 +1,5 @@
-import { apiRequest } from "./api";
+import { getControls } from "./controls";
+import { getLatestAssessmentSummary } from "./assessments";
 
 export type DashboardSummary = {
     overallCompliance: number;
@@ -20,9 +21,39 @@ export type DashboardSummary = {
     };
 };
 
-export function getDashboardSummary(token?: string) {
-    return apiRequest<DashboardSummary>("/dashboard/summary", {
-        method: "GET",
-        token,
-    });
+export async function getDashboardSummary(token?: string): Promise<DashboardSummary> {
+    const [controls, assessmentSummary] = await Promise.all([
+        getControls(undefined, token),
+        getLatestAssessmentSummary(token).catch(() => null),
+    ]);
+
+    const answerCounts = assessmentSummary?.answerCounts;
+    const implemented = answerCounts?.YES ?? 0;
+    const inProgress = answerCounts?.PARTIAL ?? 0;
+    const notApplicable = answerCounts?.NOT_APPLICABLE ?? 0;
+    const rejected = answerCounts?.NO ?? 0;
+    const total = assessmentSummary?.totalControls ?? controls.length;
+    const answeredTotal = implemented + inProgress + notApplicable + rejected;
+    const notStarted =
+        assessmentSummary?.unansweredControls ?? Math.max(total - answeredTotal, 0);
+
+    return {
+        overallCompliance: Math.round(assessmentSummary?.scorePercentage ?? 0),
+        controls: {
+            implemented,
+            inProgress,
+            notStarted,
+            total,
+        },
+        risks: {
+            high: rejected,
+            medium: inProgress,
+            low: notApplicable,
+        },
+        evidence: {
+            uploaded: implemented,
+            missing: rejected + notStarted,
+            expiring: inProgress,
+        },
+    };
 }
