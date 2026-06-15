@@ -5,14 +5,10 @@ import Link from "next/link";
 import { FormEvent, useState } from "react";
 import { useRouter } from "next/navigation";
 import {
-    getCurrentAuthUser,
     logout,
     signInWithPassword,
 } from "@/lib/auth";
-import {
-    getAdminApiAccessMessage,
-    isPlatformAdminUserId,
-} from "@/lib/adminAccess";
+import { isPlatformAdminUserId } from "@/lib/adminAccess";
 
 export default function AdminLoginPage() {
     const router = useRouter();
@@ -39,15 +35,6 @@ export default function AdminLoginPage() {
                 setMessage(
                     `This Supabase user is not configured as a platform admin. User ID: ${result.user.id}`
                 );
-                return;
-            }
-
-            const authUser = await getCurrentAuthUser(result.accessToken);
-
-            if (!authUser.platformAdmin) {
-                await logout(result.accessToken);
-                setStatus("error");
-                setMessage(getAdminApiAccessMessage());
                 return;
             }
 

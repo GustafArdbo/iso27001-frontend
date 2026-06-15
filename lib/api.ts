@@ -48,6 +48,12 @@ export async function apiRequest<T>(
         accessToken = session?.access_token;
     }
 
+    if (auth && !accessToken) {
+        throw new Error(
+            "No Supabase session was found. Please log in again."
+        );
+    }
+
     let response: Response;
 
     try {
@@ -69,9 +75,13 @@ export async function apiRequest<T>(
 
     if (!response.ok) {
         const errorText = await response.text();
+        const authMessage =
+            response.status === 401
+                ? " Backend rejected the Supabase access token. Check that the backend is configured with the same Supabase project/JWT settings as the frontend."
+                : "";
 
         throw new Error(
-            `API request failed: ${response.status} ${response.statusText} - ${errorText}`
+            `API request failed: ${response.status} ${response.statusText} - ${errorText}${authMessage}`
         );
     }
 

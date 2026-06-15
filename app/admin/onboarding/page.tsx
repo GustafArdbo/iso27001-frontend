@@ -14,7 +14,8 @@ import {
     type OwnerInvitationStatus,
     type RequestedMaterial,
 } from "@/lib/organizationApplications";
-import { getCurrentAuthUser, logout } from "@/lib/auth";
+import { logout } from "@/lib/auth";
+import { createClient } from "@/lib/supabase/client";
 
 type PageStatus = "loading" | "ready" | "error" | "unauthorized";
 
@@ -79,25 +80,38 @@ export default function AdminOnboardingPage() {
             setStatus("loading");
             setMessage("");
 
-            const authUser = await getCurrentAuthUser();
+            const supabase = createClient();
+            const {
+                data: { session },
+            } = await supabase.auth.getSession();
 
-            if (!authUser.platformAdmin) {
+            if (!session) {
                 setStatus("unauthorized");
-                setMessage("This account does not have platform admin access.");
+                setMessage("No Supabase session was found. Please log in again.");
                 return;
             }
 
-            setAdminEmail(authUser.email);
+            setAdminEmail(session.user.email ?? "Platform admin");
             setApplications(await listOrganizationApplications());
             setStatus("ready");
         } catch (error) {
             console.error(error);
-            setStatus("error");
-            setMessage(
+            const errorMessage =
                 error instanceof Error
                     ? error.message
-                    : "Could not load onboarding requests."
-            );
+                    : "Could not load onboarding requests.";
+
+            if (
+                errorMessage.includes("No Supabase session") ||
+                errorMessage.includes("API request failed: 401")
+            ) {
+                setStatus("unauthorized");
+                setMessage(errorMessage);
+                return;
+            }
+
+            setStatus("error");
+            setMessage(errorMessage);
         }
     }, []);
 

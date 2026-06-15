@@ -4,7 +4,7 @@ import Link from "next/link";
 import { FormEvent, useState } from "react";
 import { useRouter } from "next/navigation";
 import MarketingHeader from "@/components/MarketingHeader";
-import { login } from "@/lib/auth";
+import { signInWithPassword } from "@/lib/auth";
 
 export default function LoginPage() {
   const router = useRouter();
@@ -20,7 +20,7 @@ export default function LoginPage() {
       setStatus("loading");
       setMessage("");
 
-      await login({
+      await signInWithPassword({
         email: String(formData.get("email") ?? ""),
         password: String(formData.get("password") ?? ""),
       });
