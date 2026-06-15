@@ -2,6 +2,7 @@
 
 import { useRouter } from "next/navigation";
 import { logout } from "@/lib/auth";
+import OrganizationName from "@/components/OrganizationName";
 
 type AppTopbarProps = {
   title: string;
@@ -24,7 +25,7 @@ export default function AppTopbar({
   return (
     <header className="app-topbar">
       <div>
-        <p className="app-eyebrow">ISO 27001 workspace</p>
+        <p className="app-eyebrow"><OrganizationName /></p>
         <h1>{title}</h1>
         <p>{description}</p>
       </div>
