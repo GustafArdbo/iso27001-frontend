@@ -1,93 +1,123 @@
-import {
-    getCurrentOrganizationAssessments,
-    getAssessmentSummary,
-} from "./assessments";
+import { createClient } from "@/lib/supabase/client";
+import { apiRequest } from "./api";
 
-export type ReportType = "READINESS" | "CONTROL" | "EVIDENCE" | "RISK";
-export type ReportFormat = "PDF" | "LATEX";
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL?.replace(/\/$/, "");
 
-export type ReportStatus = "PENDING" | "GENERATING" | "READY" | "FAILED";
+if (!API_BASE_URL) {
+    throw new Error("Missing NEXT_PUBLIC_API_BASE_URL");
+}
+
+export type ReportType = "READINESS" | "CONTROL" | "EVIDENCE_EXPORT";
+export type ReportDownloadFormat = "PDF" | "LATEX";
+export type ReportStatus = "GENERATING" | "READY" | "FAILED";
 
 export type Report = {
     id: string;
-    title: string;
+    organizationId: string;
+    assessmentId: string;
     type: ReportType;
-    format: ReportFormat;
     status: ReportStatus;
+    title: string;
+    templateVersion?: string;
+    scorePercentage?: number;
+    gapPercentage?: number;
+    completionPercentage?: number;
+    totalControls?: number;
+    answeredControls?: number;
+    generatedAt?: string;
+    failureReason?: string;
     createdAt: string;
     downloadUrl?: string;
+    latexUrl?: string;
 };
 
 export type CreateReportPayload = {
     type: ReportType;
-    format: ReportFormat;
+    assessmentId: string;
 };
 
-const reportTitles: Record<ReportType, string> = {
-    READINESS: "Readiness report",
-    CONTROL: "Control report",
-    EVIDENCE: "Evidence export",
-    RISK: "Risk report",
-};
-
-function buildReport(
-    assessmentId: string,
-    type: ReportType,
-    format: ReportFormat,
-    createdAt: string
-): Report {
-    return {
-        id: `${assessmentId}:${type}:${format}`,
-        title: reportTitles[type],
-        type,
-        format,
-        status: "READY",
-        createdAt,
-    };
-}
-
-export async function getReports() {
-    const assessments = await getCurrentOrganizationAssessments();
-
-    return assessments.map((assessment) =>
-        buildReport(assessment.id, "READINESS", "PDF", assessment.createdAt)
-    );
-}
-
-export async function getReport(id: string) {
-    const [assessmentId, type = "READINESS", format = "PDF"] = id.split(":");
-    const summary = await getAssessmentSummary(assessmentId);
-
-    return buildReport(
-        summary.id,
-        type as ReportType,
-        format as ReportFormat,
-        new Date().toISOString()
-    );
-}
-
-export async function createReport(
-    type: ReportType,
-    format: ReportFormat = "PDF"
+function getReportDownloadPath(
+    reportId: string,
+    format: ReportDownloadFormat
 ) {
-    const assessments = await getCurrentOrganizationAssessments();
-    const latestAssessment = assessments[0];
-
-    if (!latestAssessment) {
-        throw new Error("No assessment is available for report generation.");
+    if (format === "LATEX") {
+        return `/reports/${reportId}/latex`;
     }
 
-    const summary = await getAssessmentSummary(latestAssessment.id);
-
-    return buildReport(summary.id, type, format, new Date().toISOString());
+    return `/reports/${reportId}/download`;
 }
 
-export async function downloadReport(id: string) {
-    const report = await getReport(id);
+async function getAccessToken() {
+    const supabase = createClient();
 
-    if (!report.downloadUrl) {
-        throw new Error("The backend API does not expose report downloads yet.");
+    const {
+        data: { session },
+    } = await supabase.auth.getSession();
+
+    return session?.access_token;
+}
+
+function triggerBrowserDownload(blob: Blob, filename: string) {
+    const url = window.URL.createObjectURL(blob);
+    const link = document.createElement("a");
+
+    link.href = url;
+    link.download = filename;
+
+    document.body.appendChild(link);
+    link.click();
+
+    link.remove();
+    window.URL.revokeObjectURL(url);
+}
+
+export function getReports(organizationId: string) {
+    return apiRequest<Report[]>(`/organizations/${organizationId}/reports`, {
+        method: "GET",
+    });
+}
+
+export function getReport(reportId: string) {
+    return apiRequest<Report>(`/reports/${reportId}`, {
+        method: "GET",
+    });
+}
+
+export function createReport(
+    organizationId: string,
+    payload: CreateReportPayload
+) {
+    return apiRequest<Report>(`/organizations/${organizationId}/reports`, {
+        method: "POST",
+        body: payload,
+    });
+}
+
+export async function downloadReportFile(
+    reportId: string,
+    format: ReportDownloadFormat,
+    filename: string
+) {
+    const accessToken = await getAccessToken();
+
+    const response = await fetch(
+        `${API_BASE_URL}${getReportDownloadPath(reportId, format)}`,
+        {
+            method: "GET",
+            headers: {
+                ...(accessToken ? { Authorization: `Bearer ${accessToken}` } : {}),
+            },
+        }
+    );
+
+    if (!response.ok) {
+        const errorText = await response.text();
+
+        throw new Error(
+            `Report download failed: ${response.status} ${response.statusText} - ${errorText}`
+        );
     }
 
-    return { downloadUrl: report.downloadUrl };
+    const blob = await response.blob();
+    triggerBrowserDownload(blob, filename);
 }
