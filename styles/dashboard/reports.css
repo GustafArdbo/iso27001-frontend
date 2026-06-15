@@ -6,6 +6,165 @@
     align-items: stretch;
 }
 
+/* Three report cards */
+.report-card-grid {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 22px;
+    align-items: stretch;
+}
+
+.report-option-card {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    min-height: 250px;
+}
+
+.report-option-card h2 {
+    margin: 0 0 10px;
+    color: var(--color-primary);
+}
+
+.report-option-card p {
+    margin: 0;
+    color: var(--color-text-muted);
+    line-height: 1.7;
+}
+
+/* PDF / LaTeX buttons */
+.report-format-actions {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    margin-top: 28px;
+    flex-wrap: wrap;
+}
+
+.report-format-button {
+    min-height: 50px;
+    padding: 0 28px;
+    border: 1px solid var(--color-border);
+    border-radius: 999px;
+    background: #ffffff;
+    color: var(--color-primary);
+    font: inherit;
+    font-weight: 900;
+    cursor: pointer;
+    transition:
+            transform 0.18s ease,
+            box-shadow 0.18s ease,
+            background 0.18s ease,
+            color 0.18s ease,
+            border-color 0.18s ease;
+}
+
+.report-format-button:hover {
+    transform: translateY(-1px);
+    border-color: var(--color-accent);
+    box-shadow: 0 14px 30px rgba(15, 53, 74, 0.08);
+}
+
+.report-format-button.selected {
+    border-color: var(--color-accent);
+    background: linear-gradient(135deg, var(--color-accent) 0%, #2f928d 100%);
+    color: #ffffff;
+    box-shadow: 0 14px 34px rgba(58, 175, 169, 0.2);
+}
+
+.report-format-button:disabled {
+    opacity: 0.72;
+    cursor: wait;
+    transform: none;
+}
+
+/* Status message */
+.report-status-card {
+    display: grid;
+    gap: 16px;
+    margin-top: 22px;
+}
+
+.report-success {
+    margin: 0;
+    color: var(--color-accent);
+    font-weight: 850;
+    line-height: 1.5;
+}
+
+.report-error {
+    margin: 0;
+    color: var(--color-error);
+    font-weight: 850;
+    line-height: 1.5;
+}
+
+/* Reports table */
+.reports-table-card {
+    margin-top: 22px;
+}
+
+.reports-table th,
+.reports-table td {
+    vertical-align: middle;
+}
+
+.report-status-pill {
+    display: inline-flex;
+    align-items: center;
+    min-height: 28px;
+    padding: 0 10px;
+    border-radius: 999px;
+    background: #eef3f5;
+    color: var(--color-text-muted);
+    font-size: 0.78rem;
+    font-weight: 900;
+}
+
+.report-status-pill.ready {
+    background: #dff8ec;
+    color: #16a765;
+}
+
+.report-status-pill.generating {
+    background: #e8f6f5;
+    color: var(--color-accent);
+}
+
+.report-status-pill.failed {
+    background: #ffe8e8;
+    color: var(--color-error);
+}
+
+.report-table-actions {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.report-table-button {
+    min-height: 42px;
+    padding: 0 18px;
+    border: 1px solid var(--color-border);
+    border-radius: 999px;
+    background: #ffffff;
+    color: var(--color-primary);
+    font: inherit;
+    font-weight: 900;
+    cursor: pointer;
+}
+
+.report-table-button:hover {
+    border-color: var(--color-accent);
+    color: var(--color-accent);
+}
+
+.report-table-button:disabled {
+    opacity: 0.55;
+    cursor: not-allowed;
+}
+
+/* Legacy fallback, in case old report-card classes are still used */
 .report-card {
     display: flex;
     flex-direction: column;
@@ -50,36 +209,37 @@
     text-decoration: none;
 }
 
-.report-status-card {
-    display: grid;
-    gap: 16px;
-}
-
-.report-status-card .landing-button {
-    width: fit-content;
-}
-
-.report-success {
-    margin: 0;
-    color: var(--color-accent);
-    font-weight: 850;
-    line-height: 1.5;
-}
-
-.report-error {
-    margin: 0;
-    color: var(--color-error);
-    font-weight: 850;
-    line-height: 1.5;
+@media (max-width: 1050px) {
+    .report-card-grid {
+        grid-template-columns: 1fr;
+    }
 }
 
 @media (max-width: 850px) {
+    .report-option-card,
     .report-card {
         min-height: auto;
     }
 
-    .report-action-button,
-    .report-status-card .landing-button {
+    .report-format-actions {
+        gap: 14px;
+    }
+
+    .report-format-button {
+        flex: 1;
+        min-width: 140px;
+    }
+
+    .report-table-actions {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .report-table-button {
+        width: 100%;
+    }
+
+    .report-action-button {
         width: 100%;
         justify-content: center;
     }
