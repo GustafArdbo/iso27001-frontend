@@ -135,7 +135,6 @@ export default function DashboardPage() {
                 <AppTopbar
                     title="Dashboard"
                     description="Welcome back! Here is your compliance overview."
-                    frameworkOptions={["All frameworks", "ISO 27001"]}
                 />
                 <AppLoadingState title="Loading dashboard" />
             </main>
@@ -148,7 +147,6 @@ export default function DashboardPage() {
                 <AppTopbar
                     title="Dashboard"
                     description="Welcome back! Here is your compliance overview."
-                    frameworkOptions={["All frameworks", "ISO 27001"]}
                 />
                 <AppErrorState title="Could not load dashboard" message={message} />
             </main>
@@ -161,7 +159,6 @@ export default function DashboardPage() {
                 <AppTopbar
                     title="Dashboard"
                     description="Welcome back! Here is your compliance overview."
-                    frameworkOptions={["All frameworks", "ISO 27001"]}
                 />
                 <AppEmptyState title="No dashboard data" />
             </main>
@@ -178,7 +175,6 @@ export default function DashboardPage() {
             <AppTopbar
                 title="Dashboard"
                 description="Welcome back! Here is your compliance overview."
-                frameworkOptions={["All frameworks", "ISO 27001"]}
             />
 
             <section className="app-kpi-grid">
