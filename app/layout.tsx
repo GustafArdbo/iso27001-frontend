@@ -22,6 +22,8 @@ import "../styles/dashboard/tasks.css";
 import "../styles/dashboard/reports.css";
 import "../styles/dashboard/settings.css";
 
+import "../styles/admin/onboarding.css";
+
 export const metadata: Metadata = {
     title: "ComplyPilot",
     description: "ISO 27001 readiness and compliance platform",

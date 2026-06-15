@@ -1,5 +1,5 @@
-import { getCurrentAuthUser } from "./auth";
-import { getCurrentOrganization } from "./organizations";
+import { apiRequest } from "./api";
+import { getCurrentAuthUser, getCurrentOrganizationId } from "./auth";
 
 export type WorkspaceSettings = {
     workspaceName: string;
@@ -8,10 +8,17 @@ export type WorkspaceSettings = {
 };
 
 export async function getSettings(token?: string): Promise<WorkspaceSettings> {
-    const [authUser, organization] = await Promise.all([
+    const [authUser, organizationId] = await Promise.all([
         getCurrentAuthUser(token),
-        getCurrentOrganization(token),
+        getCurrentOrganizationId(token),
     ]);
+    const organization = await apiRequest<{ name: string }>(
+        `/organizations/${organizationId}`,
+        {
+            method: "GET",
+            token,
+        }
+    );
 
     return {
         workspaceName: organization.name,
