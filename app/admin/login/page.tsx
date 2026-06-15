@@ -59,11 +59,6 @@ export default function AdminLoginPage() {
                 <section className="admin-login-card">
                     <div className="admin-login-copy">
                         <p className="admin-eyebrow">Platform admin</p>
-                        <h1>Review onboarding requests.</h1>
-                        <p>
-                            Sign in with a platform admin account to approve customer
-                            applications, create owner access, and resend invitation links.
-                        </p>
                     </div>
 
                     <form className="admin-login-form" onSubmit={handleSubmit}>

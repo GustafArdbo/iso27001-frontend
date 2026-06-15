@@ -82,10 +82,16 @@
 
 .admin-login-card {
     display: grid;
-    grid-template-columns: minmax(0, 1fr) minmax(360px, 440px);
-    gap: 44px;
-    align-items: center;
-    padding: 46px;
+    grid-template-columns: minmax(0, 440px);
+    justify-content: center;
+    gap: 22px;
+    max-width: 520px;
+    margin: 0 auto;
+    padding: 34px;
+}
+
+.admin-login-copy .admin-eyebrow {
+    margin-bottom: 0;
 }
 
 .admin-eyebrow,
