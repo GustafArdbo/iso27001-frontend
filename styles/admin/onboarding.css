@@ -186,6 +186,37 @@
     text-decoration: none;
 }
 
+.admin-inline-link {
+    margin-top: 0;
+}
+
+.admin-tabs {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-wrap: wrap;
+    margin-bottom: 22px;
+}
+
+.admin-tabs a {
+    display: inline-flex;
+    align-items: center;
+    min-height: 44px;
+    padding: 0 16px;
+    border: 1px solid var(--color-border);
+    border-radius: 8px;
+    background: #ffffff;
+    color: var(--color-primary);
+    font-weight: 850;
+    text-decoration: none;
+}
+
+.admin-tabs a.active {
+    border-color: rgba(58, 175, 169, 0.45);
+    background: var(--color-info-bg);
+    color: var(--color-accent);
+}
+
 .admin-login-form button:disabled,
 .admin-card-actions button:disabled,
 .admin-secondary-button:disabled {
@@ -419,7 +450,8 @@
 
     .admin-card-actions button,
     .admin-secondary-button,
-    .admin-topbar-actions button {
+    .admin-topbar-actions button,
+    .admin-inline-link {
         width: 100%;
     }
 

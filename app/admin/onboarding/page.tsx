@@ -242,6 +242,13 @@ export default function AdminOnboardingPage() {
                     </button>
                 </section>
 
+                <nav className="admin-tabs" aria-label="Admin sections">
+                    <Link href="/admin/onboarding" className="active">
+                        Onboarding requests
+                    </Link>
+                    <Link href="/admin/support">Support tickets</Link>
+                </nav>
+
                 <section className="admin-stats" aria-label="Application summary">
                     <article>
                         <span>Submitted</span>

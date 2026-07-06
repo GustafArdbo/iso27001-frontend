@@ -1,7 +1,6 @@
 "use client";
 
 import { FormEvent, useEffect, useState } from "react";
-import Link from "next/link";
 import AppTopbar from "@/components/AppTopbar";
 import InviteMemberForm from "@/components/InviteMemberForm";
 import {
@@ -10,8 +9,10 @@ import {
 } from "@/components/AppDataState";
 import { useDashboardContext } from "@/components/DashboardContext";
 import { createClient } from "@/lib/supabase/client";
+import { createSupportTicket } from "@/lib/supportTickets";
 
 type Status = "idle" | "loading" | "success" | "error";
+type SupportStatus = "idle" | "success" | "error";
 
 export default function SettingsPage() {
   const {
@@ -28,6 +29,13 @@ export default function SettingsPage() {
   const [accountMessage, setAccountMessage] = useState("");
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
+  const [isSupportOpen, setIsSupportOpen] = useState(false);
+  const [supportStatus, setSupportStatus] = useState<SupportStatus>("idle");
+  const [supportMessage, setSupportMessage] = useState("");
+  const [supportName, setSupportName] = useState("");
+  const [supportEmail, setSupportEmail] = useState("");
+  const [supportPhone, setSupportPhone] = useState("");
+  const [supportIssue, setSupportIssue] = useState("");
 
   useEffect(() => {
     async function loadAccount() {
@@ -45,9 +53,12 @@ export default function SettingsPage() {
 
         setName(metadataName);
         setEmail(supabaseUser?.email ?? user?.email ?? "");
+        setSupportName(metadataName);
+        setSupportEmail(supabaseUser?.email ?? user?.email ?? "");
       } catch (loadError) {
         console.error(loadError);
         setEmail(user?.email ?? "");
+        setSupportEmail(user?.email ?? "");
       }
     }
 
@@ -90,6 +101,39 @@ export default function SettingsPage() {
           updateError instanceof Error
               ? updateError.message
               : "Could not update account."
+      );
+    }
+  }
+
+  function handleSupportSubmit(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+
+    try {
+      createSupportTicket({
+        name: supportName.trim(),
+        email: supportEmail.trim(),
+        phone: supportPhone.trim(),
+        message: supportIssue.trim(),
+        organizationId,
+        organizationName,
+      });
+
+      setSupportStatus("success");
+      setSupportMessage("Support request sent to the admin team.");
+      setSupportIssue("");
+      setSupportPhone("");
+      window.setTimeout(() => {
+        setIsSupportOpen(false);
+        setSupportStatus("idle");
+        setSupportMessage("");
+      }, 1200);
+    } catch (supportError) {
+      console.error(supportError);
+      setSupportStatus("error");
+      setSupportMessage(
+          supportError instanceof Error
+              ? supportError.message
+              : "Could not send support request."
       );
     }
   }
@@ -203,12 +247,13 @@ export default function SettingsPage() {
                 Need help with your workspace, access, or ISO 27001 setup?
               </p>
 
-              <Link
+              <button
+                  type="button"
                   className="settings-support-link"
-                  href="/dashboard/support"
+                  onClick={() => setIsSupportOpen(true)}
               >
                 Contact support
-              </Link>
+              </button>
             </div>
           </article>
         </section>
@@ -225,6 +270,102 @@ export default function SettingsPage() {
 
           <InviteMemberForm organizationId={organizationId} />
         </section>
+
+        {isSupportOpen && (
+            <div className="support-modal-backdrop" role="presentation">
+              <section
+                  className="support-modal app-card"
+                  role="dialog"
+                  aria-modal="true"
+                  aria-labelledby="support-modal-title"
+              >
+                <div className="app-card-header">
+                  <div>
+                    <h2 id="support-modal-title">Contact support</h2>
+                    <p>
+                      Tell us who to contact and what you need help with. The
+                      request will appear in the admin support queue.
+                    </p>
+                  </div>
+                  <button
+                      type="button"
+                      className="support-modal-close"
+                      aria-label="Close support form"
+                      onClick={() => setIsSupportOpen(false)}
+                  >
+                    ×
+                  </button>
+                </div>
+
+                <form className="support-modal-form" onSubmit={handleSupportSubmit}>
+                  <div className="row">
+                    <label>
+                      Name
+                      <input
+                          type="text"
+                          value={supportName}
+                          placeholder="Your name"
+                          onChange={(event) => setSupportName(event.target.value)}
+                          required
+                      />
+                    </label>
+
+                    <label>
+                      Email
+                      <input
+                          type="email"
+                          value={supportEmail}
+                          placeholder="you@company.com"
+                          onChange={(event) => setSupportEmail(event.target.value)}
+                          required
+                      />
+                    </label>
+                  </div>
+
+                  <label>
+                    Phone number
+                    <input
+                        type="tel"
+                        value={supportPhone}
+                        placeholder="+46 70 123 45 67"
+                        onChange={(event) => setSupportPhone(event.target.value)}
+                    />
+                  </label>
+
+                  <label>
+                    Issue
+                    <textarea
+                        value={supportIssue}
+                        placeholder="Describe what you need help with."
+                        onChange={(event) => setSupportIssue(event.target.value)}
+                        required
+                    />
+                  </label>
+
+                  <div className="support-modal-actions">
+                    <button type="submit">Send support request</button>
+                    <button
+                        type="button"
+                        className="support-modal-secondary"
+                        onClick={() => setIsSupportOpen(false)}
+                    >
+                      Cancel
+                    </button>
+                  </div>
+
+                  {supportMessage && (
+                      <p
+                          className={`feedback ${
+                              supportStatus === "error" ? "error" : ""
+                          }`}
+                      >
+                        {supportMessage}
+                      </p>
+                  )}
+                </form>
+              </section>
+            </div>
+        )}
       </main>
   );
 }
