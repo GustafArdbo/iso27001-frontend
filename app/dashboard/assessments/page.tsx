@@ -68,7 +68,11 @@ export default function AssessmentsPage() {
     }
 
     useEffect(() => {
-        loadAssessments();
+        const timeoutId = window.setTimeout(() => {
+            void loadAssessments();
+        }, 0);
+
+        return () => window.clearTimeout(timeoutId);
     }, []);
 
     async function handleCreate(event: FormEvent<HTMLFormElement>) {

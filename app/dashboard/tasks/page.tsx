@@ -49,7 +49,11 @@ export default function TasksPage() {
     }
 
     useEffect(() => {
-        loadTasks();
+        const timeoutId = window.setTimeout(() => {
+            void loadTasks();
+        }, 0);
+
+        return () => window.clearTimeout(timeoutId);
     }, []);
 
     async function handleStatusChange(task: Task, nextStatus: Task["status"]) {

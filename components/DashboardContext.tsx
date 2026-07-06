@@ -34,8 +34,16 @@ const ORGANIZATION_NAME_CACHE_KEY = "complypilot:organizationName";
 export function DashboardProvider({ children }: { children: ReactNode }) {
     const [user, setUser] = useState<CurrentAuthUser | null>(null);
     const [organization, setOrganization] = useState<Organization | null>(null);
-    const [organizationId, setOrganizationId] = useState("");
-    const [organizationName, setOrganizationName] = useState<string | null>(null);
+    const [organizationId, setOrganizationId] = useState(() =>
+        typeof window === "undefined"
+            ? ""
+            : window.sessionStorage.getItem(ORGANIZATION_ID_CACHE_KEY) ?? ""
+    );
+    const [organizationName, setOrganizationName] = useState<string | null>(() =>
+        typeof window === "undefined"
+            ? null
+            : window.sessionStorage.getItem(ORGANIZATION_NAME_CACHE_KEY)
+    );
     const [isLoading, setIsLoading] = useState(true);
     const [error, setError] = useState("");
 
@@ -89,22 +97,11 @@ export function DashboardProvider({ children }: { children: ReactNode }) {
     }, []);
 
     useEffect(() => {
-        const cachedOrganizationId = window.sessionStorage.getItem(
-            ORGANIZATION_ID_CACHE_KEY
-        );
-        const cachedOrganizationName = window.sessionStorage.getItem(
-            ORGANIZATION_NAME_CACHE_KEY
-        );
+        const timeoutId = window.setTimeout(() => {
+            void loadDashboardContext();
+        }, 0);
 
-        if (cachedOrganizationId) {
-            setOrganizationId(cachedOrganizationId);
-        }
-
-        if (cachedOrganizationName) {
-            setOrganizationName(cachedOrganizationName);
-        }
-
-        void loadDashboardContext();
+        return () => window.clearTimeout(timeoutId);
     }, [loadDashboardContext]);
 
     const value = useMemo<DashboardContextValue>(

@@ -112,7 +112,11 @@ export default function ReportsPage() {
     }
 
     useEffect(() => {
-        void loadReportsPage();
+        const timeoutId = window.setTimeout(() => {
+            void loadReportsPage();
+        }, 0);
+
+        return () => window.clearTimeout(timeoutId);
     }, []);
 
     async function refreshReports() {

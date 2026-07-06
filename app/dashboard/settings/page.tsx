@@ -124,8 +124,8 @@ export default function SettingsPage() {
             description="Manage workspace preferences, organization details, and account settings."
         />
 
-        <section className="app-page-grid">
-          <article className="app-card">
+        <section className="app-page-grid settings-card-grid">
+          <article className="app-card settings-summary-card">
             <div className="app-card-header">
               <h2>Organization</h2>
             </div>
@@ -147,7 +147,7 @@ export default function SettingsPage() {
             </form>
           </article>
 
-          <article className="app-card">
+          <article className="app-card settings-summary-card">
             <div className="app-card-header">
               <h2>Account</h2>
             </div>
@@ -190,6 +190,25 @@ export default function SettingsPage() {
                   </p>
               )}
             </form>
+          </article>
+
+          <article className="app-card settings-summary-card support-card">
+            <div className="app-card-header">
+              <h2>Support</h2>
+            </div>
+
+            <div className="settings-support-content">
+              <p>
+                Need help with your workspace, access, or ISO 27001 setup?
+              </p>
+
+              <a
+                  className="settings-support-link"
+                  href="mailto:hello@complypilot.com"
+              >
+                Contact support
+              </a>
+            </div>
           </article>
         </section>
 
