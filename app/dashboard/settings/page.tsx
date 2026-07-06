@@ -1,6 +1,7 @@
 "use client";
 
 import { FormEvent, useEffect, useState } from "react";
+import Link from "next/link";
 import AppTopbar from "@/components/AppTopbar";
 import InviteMemberForm from "@/components/InviteMemberForm";
 import {
@@ -202,12 +203,12 @@ export default function SettingsPage() {
                 Need help with your workspace, access, or ISO 27001 setup?
               </p>
 
-              <a
+              <Link
                   className="settings-support-link"
-                  href="mailto:hello@complypilot.com"
+                  href="/dashboard/support"
               >
                 Contact support
-              </a>
+              </Link>
             </div>
           </article>
         </section>
