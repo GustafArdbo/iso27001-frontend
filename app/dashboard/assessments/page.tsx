@@ -9,16 +9,29 @@ import {
 } from "@/components/AppDataState";
 import {
     createAssessmentForCurrentOrganization,
-    getAssessmentSummary,
     getCurrentOrganizationAssessments,
     type AssessmentResponse,
-    type AssessmentSummaryResponse,
 } from "@/lib/assessments";
+import {
+    answerLabels,
+    calculateEvaluationScore,
+    companyProfileFields,
+    evaluationSections,
+    reportQuestions,
+    type EvaluationAnswer,
+    type ProfileField,
+    type ReportQuestion,
+    type StoredEvaluation,
+} from "@/lib/iso27001Evaluation";
 
 type PageStatus = "loading" | "ready" | "error";
+type SaveStatus = "idle" | "saving" | "success" | "error";
 
-type AssessmentRow = AssessmentResponse & {
-    summary: AssessmentSummaryResponse | null;
+const emptyEvaluation: StoredEvaluation = {
+    profile: {},
+    answers: {},
+    comments: {},
+    report: {},
 };
 
 function getErrorMessage(error: unknown) {
@@ -39,26 +52,186 @@ function formatDate(value: string) {
     }).format(new Date(value));
 }
 
+function storageKey(assessmentId: string) {
+    return `complypilot:iso27001-evaluation:${assessmentId}`;
+}
+
+function loadStoredEvaluation(assessmentId: string): StoredEvaluation {
+    if (!assessmentId || typeof window === "undefined") {
+        return emptyEvaluation;
+    }
+
+    const stored = window.localStorage.getItem(storageKey(assessmentId));
+
+    if (!stored) {
+        return emptyEvaluation;
+    }
+
+    try {
+        return {
+            ...emptyEvaluation,
+            ...JSON.parse(stored),
+        };
+    } catch {
+        return emptyEvaluation;
+    }
+}
+
+function renderProfileInput(
+    field: ProfileField,
+    value: string | string[] | undefined,
+    onChange: (value: string | string[]) => void
+) {
+    const textValue = typeof value === "string" ? value : "";
+    const selectedValues = Array.isArray(value) ? value : [];
+
+    if (field.type === "textarea") {
+        return (
+            <textarea
+                value={textValue}
+                onChange={(event) => onChange(event.target.value)}
+            />
+        );
+    }
+
+    if (field.type === "select") {
+        return (
+            <select value={textValue} onChange={(event) => onChange(event.target.value)}>
+                <option value="">Select</option>
+                {field.options?.map((option) => (
+                    <option key={option}>{option}</option>
+                ))}
+            </select>
+        );
+    }
+
+    if (
+        field.type === "yes-no" ||
+        field.type === "yes-no-partial" ||
+        field.type === "yes-no-dont-know"
+    ) {
+        const options =
+            field.type === "yes-no"
+                ? ["Yes", "No"]
+                : field.type === "yes-no-partial"
+                  ? ["Yes", "No", "Partially"]
+                  : ["Yes", "No", "Don't know"];
+
+        return (
+            <select value={textValue} onChange={(event) => onChange(event.target.value)}>
+                <option value="">Select</option>
+                {options.map((option) => (
+                    <option key={option}>{option}</option>
+                ))}
+            </select>
+        );
+    }
+
+    if (field.type === "multiselect") {
+        return (
+            <div className="assessment-checkbox-grid">
+                {field.options?.map((option) => (
+                    <label key={option}>
+                        <input
+                            type="checkbox"
+                            checked={selectedValues.includes(option)}
+                            onChange={(event) => {
+                                onChange(
+                                    event.target.checked
+                                        ? [...selectedValues, option]
+                                        : selectedValues.filter((item) => item !== option)
+                                );
+                            }}
+                        />
+                        <span>{option}</span>
+                    </label>
+                ))}
+            </div>
+        );
+    }
+
+    if (field.type === "file") {
+        return (
+            <>
+                <input
+                    type="file"
+                    multiple
+                    onChange={(event) =>
+                        onChange(
+                            Array.from(event.target.files ?? []).map((file) => file.name)
+                        )
+                    }
+                />
+                {selectedValues.length > 0 && (
+                    <p className="assessment-file-note">
+                        Selected: {selectedValues.join(", ")}
+                    </p>
+                )}
+            </>
+        );
+    }
+
+    return (
+        <input
+            type={field.type === "email" || field.type === "date" ? field.type : "text"}
+            value={textValue}
+            onChange={(event) => onChange(event.target.value)}
+        />
+    );
+}
+
+function renderReportInput(
+    question: ReportQuestion,
+    value: string,
+    onChange: (value: string) => void
+) {
+    if (question.type === "textarea") {
+        return (
+            <textarea
+                value={value}
+                onChange={(event) => onChange(event.target.value)}
+            />
+        );
+    }
+
+    const options = question.type === "yes-no" ? ["Yes", "No"] : question.options ?? [];
+
+    return (
+        <select value={value} onChange={(event) => onChange(event.target.value)}>
+            <option value="">Select</option>
+            {options.map((option) => (
+                <option key={option}>{option}</option>
+            ))}
+        </select>
+    );
+}
+
 export default function AssessmentsPage() {
     const [status, setStatus] = useState<PageStatus>("loading");
+    const [saveStatus, setSaveStatus] = useState<SaveStatus>("idle");
     const [message, setMessage] = useState("");
-    const [assessments, setAssessments] = useState<AssessmentRow[]>([]);
+    const [saveMessage, setSaveMessage] = useState("");
+    const [assessments, setAssessments] = useState<AssessmentResponse[]>([]);
+    const [selectedAssessmentId, setSelectedAssessmentId] = useState("");
+    const [evaluation, setEvaluation] =
+        useState<StoredEvaluation>(emptyEvaluation);
     const [creating, setCreating] = useState(false);
 
-    async function loadAssessments() {
+    async function loadAssessments(preferredAssessmentId?: string) {
         try {
             setStatus("loading");
             setMessage("");
 
             const assessmentData = await getCurrentOrganizationAssessments();
-            const rows = await Promise.all(
-                assessmentData.map(async (assessment) => ({
-                    ...assessment,
-                    summary: await getAssessmentSummary(assessment.id).catch(() => null),
-                }))
-            );
+            const nextAssessmentId =
+                preferredAssessmentId ||
+                selectedAssessmentId ||
+                assessmentData[0]?.id ||
+                "";
 
-            setAssessments(rows);
+            setAssessments(assessmentData);
+            setSelectedAssessmentId(nextAssessmentId);
+            setEvaluation(loadStoredEvaluation(nextAssessmentId));
             setStatus("ready");
         } catch (error) {
             console.error(error);
@@ -73,7 +246,16 @@ export default function AssessmentsPage() {
         }, 0);
 
         return () => window.clearTimeout(timeoutId);
+        // Initial load only. Subsequent refreshes are triggered by form actions.
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
+
+    function handleAssessmentChange(assessmentId: string) {
+        setSelectedAssessmentId(assessmentId);
+        setEvaluation(loadStoredEvaluation(assessmentId));
+        setSaveMessage("");
+        setSaveStatus("idle");
+    }
 
     async function handleCreate(event: FormEvent<HTMLFormElement>) {
         event.preventDefault();
@@ -87,9 +269,9 @@ export default function AssessmentsPage() {
         try {
             setCreating(true);
             setMessage("");
-            await createAssessmentForCurrentOrganization(name);
+            const assessment = await createAssessmentForCurrentOrganization(name);
             form.reset();
-            await loadAssessments();
+            await loadAssessments(assessment.id);
         } catch (error) {
             console.error(error);
             setMessage(getErrorMessage(error));
@@ -99,23 +281,79 @@ export default function AssessmentsPage() {
         }
     }
 
-    const latest = assessments[0] ?? null;
-    const score = latest?.summary?.scorePercentage ?? 0;
-    const progress = latest?.summary?.completionPercentage ?? 0;
-    const answered = latest?.summary?.answeredControls ?? 0;
-    const total = latest?.summary?.totalControls ?? 0;
+    function updateEvaluation(nextEvaluation: StoredEvaluation) {
+        setEvaluation(nextEvaluation);
+        setSaveStatus("idle");
+        setSaveMessage("");
+    }
 
-    const averageScore = useMemo(() => {
-        const scored = assessments
-            .map((assessment) => assessment.summary?.scorePercentage)
-            .filter((value): value is number => typeof value === "number");
+    function updateProfileValue(fieldId: string, value: string | string[]) {
+        updateEvaluation({
+            ...evaluation,
+            profile: {
+                ...evaluation.profile,
+                [fieldId]: value,
+            },
+        });
+    }
 
-        if (!scored.length) return 0;
+    function updateAnswer(questionId: string, answer: EvaluationAnswer) {
+        updateEvaluation({
+            ...evaluation,
+            answers: {
+                ...evaluation.answers,
+                [questionId]: answer,
+            },
+        });
+    }
 
-        return Math.round(
-            scored.reduce((sum, value) => sum + value, 0) / scored.length
-        );
-    }, [assessments]);
+    function updateComment(questionId: string, comment: string) {
+        updateEvaluation({
+            ...evaluation,
+            comments: {
+                ...evaluation.comments,
+                [questionId]: comment,
+            },
+        });
+    }
+
+    function updateReportValue(questionId: string, value: string) {
+        updateEvaluation({
+            ...evaluation,
+            report: {
+                ...evaluation.report,
+                [questionId]: value,
+            },
+        });
+    }
+
+    function handleSaveEvaluation(event: FormEvent<HTMLFormElement>) {
+        event.preventDefault();
+
+        if (!selectedAssessmentId) return;
+
+        try {
+            setSaveStatus("saving");
+            window.localStorage.setItem(
+                storageKey(selectedAssessmentId),
+                JSON.stringify(evaluation)
+            );
+            setSaveStatus("success");
+            setSaveMessage("Evaluation saved. The compliance score has been updated.");
+        } catch (error) {
+            console.error(error);
+            setSaveStatus("error");
+            setSaveMessage(getErrorMessage(error));
+        }
+    }
+
+    const selectedAssessment = assessments.find(
+        (assessment) => assessment.id === selectedAssessmentId
+    );
+    const score = useMemo(
+        () => calculateEvaluationScore(evaluation.answers),
+        [evaluation.answers]
+    );
 
     return (
         <main className="app-main assessments-page">
@@ -134,29 +372,213 @@ export default function AssessmentsPage() {
                 <>
                     <section className="app-page-grid two">
                         <article className="app-card assessment-highlight">
-                            <h2>{latest ? latest.name : "Assessment progress"}</h2>
+                            <h2>
+                                {selectedAssessment
+                                    ? selectedAssessment.name
+                                    : "Assessment progress"}
+                            </h2>
                             <p>
-                                {latest
-                                    ? `${answered} of ${total} controls answered.`
-                                    : "Create an assessment to start tracking readiness."}
+                                {score.answeredCount} of {score.totalQuestions} scored
+                                questions answered.
                             </p>
                             <div className="assessment-progress">
-                                <span style={{ width: `${progress}%` }}></span>
+                                <span
+                                    style={{
+                                        width: `${
+                                            (score.answeredCount / score.totalQuestions) * 100
+                                        }%`,
+                                    }}
+                                ></span>
                             </div>
+                            <p className="app-muted-text">
+                                {score.readinessLevel}: {score.interpretation}
+                            </p>
                         </article>
 
                         <article className="app-card">
-                            <h2>Gap score</h2>
+                            <h2>Compliance score</h2>
                             <strong className="assessment-score">
-                                {latest ? `${Math.round(score)}%` : `${averageScore}%`}
+                                {score.percentage}%
                             </strong>
                             <p>
-                                {latest
-                                    ? "Current readiness score for the latest assessment."
-                                    : "Average readiness score across available assessments."}
+                                Weighted score based on answered applicable ISO 27001
+                                questions.
                             </p>
                         </article>
                     </section>
+
+                    {assessments.length > 0 && (
+                        <section className="app-card app-table-card assessment-form-card">
+                            <div className="app-card-header">
+                                <div>
+                                    <h2>ISO 27001 compliance evaluation</h2>
+                                    <p className="app-muted-text">
+                                        Complete the company profile, answer readiness and Annex
+                                        A controls, and add report context.
+                                    </p>
+                                </div>
+                            </div>
+
+                            <label className="assessment-select-label">
+                                Assessment
+                                <select
+                                    value={selectedAssessmentId}
+                                    onChange={(event) =>
+                                        handleAssessmentChange(event.target.value)
+                                    }
+                                >
+                                    {assessments.map((assessment) => (
+                                        <option key={assessment.id} value={assessment.id}>
+                                            {assessment.name}
+                                        </option>
+                                    ))}
+                                </select>
+                            </label>
+
+                            <form
+                                className="assessment-question-form"
+                                onSubmit={handleSaveEvaluation}
+                            >
+                                <section className="assessment-section">
+                                    <div className="assessment-section-header">
+                                        <span>Part A</span>
+                                        <h3>Company profile</h3>
+                                        <p>
+                                            These fields are not scored. They provide context for
+                                            scope, recommendations, and reporting.
+                                        </p>
+                                    </div>
+
+                                    <div className="assessment-profile-grid">
+                                        {companyProfileFields.map((field) => (
+                                            <label
+                                                className="assessment-field-label"
+                                                key={field.id}
+                                            >
+                                                <span>
+                                                    {field.id}. {field.label}
+                                                </span>
+                                                {renderProfileInput(
+                                                    field,
+                                                    evaluation.profile[field.id],
+                                                    (value) => updateProfileValue(field.id, value)
+                                                )}
+                                            </label>
+                                        ))}
+                                    </div>
+                                </section>
+
+                                {evaluationSections.map((section) => (
+                                    <section className="assessment-section" key={section.id}>
+                                        <div className="assessment-section-header">
+                                            <span>{section.group}</span>
+                                            <h3>{section.title}</h3>
+                                        </div>
+
+                                        {section.questions.map((question) => (
+                                            <article
+                                                className="assessment-question-card"
+                                                key={question.id}
+                                            >
+                                                <div className="assessment-question-copy">
+                                                    <span>
+                                                        {question.id} · Weight {question.weight} ·{" "}
+                                                        {question.mapping}
+                                                    </span>
+                                                    <h3>{question.question}</h3>
+                                                    <p>Example evidence: {question.evidence}</p>
+                                                </div>
+
+                                                <div className="assessment-answer-grid">
+                                                    {(
+                                                        Object.keys(answerLabels) as EvaluationAnswer[]
+                                                    ).map((answer) => (
+                                                        <label key={answer}>
+                                                            <input
+                                                                type="radio"
+                                                                name={`answer-${question.id}`}
+                                                                value={answer}
+                                                                checked={
+                                                                    evaluation.answers[question.id] ===
+                                                                    answer
+                                                                }
+                                                                onChange={() =>
+                                                                    updateAnswer(question.id, answer)
+                                                                }
+                                                            />
+                                                            <span>{answerLabels[answer]}</span>
+                                                        </label>
+                                                    ))}
+                                                </div>
+
+                                                <label className="assessment-comment-label">
+                                                    Comment or evidence notes
+                                                    <textarea
+                                                        value={evaluation.comments[question.id] ?? ""}
+                                                        placeholder="Add context, evidence notes, or remediation details"
+                                                        onChange={(event) =>
+                                                            updateComment(
+                                                                question.id,
+                                                                event.target.value
+                                                            )
+                                                        }
+                                                    />
+                                                </label>
+                                            </article>
+                                        ))}
+                                    </section>
+                                ))}
+
+                                <section className="assessment-section">
+                                    <div className="assessment-section-header">
+                                        <span>Report context</span>
+                                        <h3>Extra questions for report generation</h3>
+                                        <p>
+                                            These fields are not scored, but make the gap report and
+                                            roadmap more useful.
+                                        </p>
+                                    </div>
+
+                                    <div className="assessment-profile-grid">
+                                        {reportQuestions.map((question) => (
+                                            <label
+                                                className="assessment-field-label"
+                                                key={question.id}
+                                            >
+                                                <span>
+                                                    {question.id}. {question.question}
+                                                </span>
+                                                <small>{question.purpose}</small>
+                                                {renderReportInput(
+                                                    question,
+                                                    evaluation.report[question.id] ?? "",
+                                                    (value) => updateReportValue(question.id, value)
+                                                )}
+                                            </label>
+                                        ))}
+                                    </div>
+                                </section>
+
+                                <div className="assessment-form-actions">
+                                    <button type="submit" disabled={saveStatus === "saving"}>
+                                        {saveStatus === "saving"
+                                            ? "Saving..."
+                                            : "Save evaluation"}
+                                    </button>
+
+                                    {saveMessage && (
+                                        <p
+                                            className={`assessment-save-message ${
+                                                saveStatus === "error" ? "error" : ""
+                                            }`}
+                                        >
+                                            {saveMessage}
+                                        </p>
+                                    )}
+                                </div>
+                            </form>
+                        </section>
+                    )}
 
                     <section className="app-card app-table-card">
                         <div className="app-card-header">
@@ -186,7 +608,7 @@ export default function AssessmentsPage() {
                     {!assessments.length ? (
                         <AppEmptyState
                             title="No assessments"
-                            message="No assessments were returned by the API."
+                            message="Create an assessment to start the ISO 27001 evaluation."
                         />
                     ) : (
                         <section className="app-card app-table-card">
@@ -199,8 +621,6 @@ export default function AssessmentsPage() {
                                     <tr>
                                         <th>Name</th>
                                         <th>Status</th>
-                                        <th>Progress</th>
-                                        <th>Score</th>
                                         <th>Created</th>
                                     </tr>
                                 </thead>
@@ -210,23 +630,13 @@ export default function AssessmentsPage() {
                                         <tr key={assessment.id}>
                                             <td>{assessment.name}</td>
                                             <td>
-                                                <span className={`app-pill ${statusPill(assessment.status)}`}>
+                                                <span
+                                                    className={`app-pill ${statusPill(
+                                                        assessment.status
+                                                    )}`}
+                                                >
                                                     {assessment.status.replace("_", " ")}
                                                 </span>
-                                            </td>
-                                            <td>
-                                                {assessment.summary
-                                                    ? `${Math.round(
-                                                          assessment.summary.completionPercentage
-                                                      )}%`
-                                                    : "Unavailable"}
-                                            </td>
-                                            <td>
-                                                {assessment.summary
-                                                    ? `${Math.round(
-                                                          assessment.summary.scorePercentage
-                                                      )}%`
-                                                    : "Unavailable"}
                                             </td>
                                             <td>{formatDate(assessment.createdAt)}</td>
                                         </tr>
