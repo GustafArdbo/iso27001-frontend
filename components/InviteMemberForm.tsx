@@ -5,9 +5,16 @@ import { createInvitation, type TeamRole } from "@/lib/team";
 
 type Status = "idle" | "loading" | "success" | "error";
 
-export default function InviteMemberForm() {
+type InviteMemberFormProps = {
+    organizationId: string;
+};
+
+export default function InviteMemberForm({
+                                             organizationId,
+                                         }: InviteMemberFormProps) {
     const [status, setStatus] = useState<Status>("idle");
     const [message, setMessage] = useState("");
+    const [acceptanceToken, setAcceptanceToken] = useState("");
 
     async function handleSubmit(event: FormEvent<HTMLFormElement>) {
         event.preventDefault();
@@ -16,22 +23,30 @@ export default function InviteMemberForm() {
         const formData = new FormData(form);
 
         const payload = {
-            email: String(formData.get("email") ?? ""),
-            name: String(formData.get("name") ?? ""),
+            email: String(formData.get("email") ?? "").trim(),
             role: String(formData.get("role") ?? "MEMBER") as Exclude<
                 TeamRole,
                 "OWNER"
             >,
         };
 
+        if (!organizationId) {
+            setStatus("error");
+            setMessage("No organization is loaded yet.");
+            return;
+        }
+
         try {
             setStatus("loading");
             setMessage("");
+            setAcceptanceToken("");
 
-            await createInvitation(payload);
+            const response = await createInvitation(organizationId, payload);
 
             setStatus("success");
-            setMessage("Invitation sent successfully.");
+            setMessage("Invitation created successfully.");
+            setAcceptanceToken(response.acceptanceToken ?? "");
+
             form.reset();
         } catch (error) {
             console.error(error);
@@ -44,34 +59,31 @@ export default function InviteMemberForm() {
 
     return (
         <form className="team-invite-form" onSubmit={handleSubmit}>
-            <div className="row">
-                <label>
-                    Email
-                    <input
-                        type="email"
-                        name="email"
-                        placeholder="colleague@company.com"
-                        required
-                    />
-                </label>
-
-                <label>
-                    Name
-                    <input type="text" name="name" placeholder="Jane Doe" />
-                </label>
-            </div>
+            <label>
+                Email
+                <input
+                    type="email"
+                    name="email"
+                    placeholder="colleague@company.com"
+                    required
+                />
+            </label>
 
             <label>
                 Role
                 <select name="role" defaultValue="MEMBER">
                     <option value="ADMIN">Admin</option>
+                    <option value="AUDITOR">Auditor</option>
                     <option value="MEMBER">Member</option>
                     <option value="VIEWER">Viewer</option>
                 </select>
             </label>
 
             <div className="actions">
-                <button type="submit" disabled={status === "loading"}>
+                <button
+                    type="submit"
+                    disabled={status === "loading" || !organizationId}
+                >
                     {status === "loading" ? "Sending..." : "Send invitation"}
                 </button>
             </div>
@@ -79,6 +91,12 @@ export default function InviteMemberForm() {
             {message && (
                 <p className={`feedback ${status === "error" ? "error" : ""}`}>
                     {message}
+                </p>
+            )}
+
+            {acceptanceToken && (
+                <p className="feedback">
+                    Invitation token: <strong>{acceptanceToken}</strong>
                 </p>
             )}
         </form>

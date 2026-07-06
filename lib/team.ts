@@ -1,163 +1,68 @@
 import { apiRequest } from "./api";
-import { getCurrentOrganizationId, type MembershipRole } from "./auth";
 
-export type TeamRole = MembershipRole;
+export type TeamRole = "OWNER" | "ADMIN" | "AUDITOR" | "MEMBER" | "VIEWER";
 
-export type MembershipResponse = {
+export type TeamMember = {
     id: string;
     organizationId: string;
     userProfileId: string;
     email: string;
-    supabaseUserId: string | null;
-    role: MembershipRole;
+    supabaseUserId?: string;
+    role: TeamRole;
     createdAt: string;
 };
 
-export type TeamMember = MembershipResponse & {
-    name?: string;
-    status: "ACTIVE";
-};
+export type InvitationStatus = "PENDING" | "ACCEPTED" | "EXPIRED" | "REVOKED";
 
-export type InvitationStatus = "PENDING" | "ACCEPTED" | "REVOKED" | "EXPIRED";
-
-export type InvitationResponse = {
+export type Invitation = {
     id: string;
     organizationId: string;
     email: string;
-    role: MembershipRole;
+    role: Exclude<TeamRole, "OWNER">;
     status: InvitationStatus;
-    expiresAt: string;
-    acceptedAt: string | null;
-    revokedAt: string | null;
-    invitedByMembershipId: string;
-    acceptedByMembershipId: string | null;
-    revokedByMembershipId: string | null;
+    expiresAt?: string;
+    acceptedAt?: string;
+    revokedAt?: string;
     createdAt: string;
 };
 
-export type Invitation = InvitationResponse;
-
-export type CreateMembershipPayload = {
-    email: string;
-    role: MembershipRole;
-    supabaseUserId?: string;
+export type CreateInvitationResponse = {
+    invitation: Invitation;
+    acceptanceToken?: string;
 };
 
 export type CreateInvitationPayload = {
     email: string;
-    name?: string;
-    role: Exclude<MembershipRole, "OWNER">;
+    role: Exclude<TeamRole, "OWNER">;
 };
 
-export type CreateInvitationResponse = {
-    invitation: InvitationResponse;
-    acceptanceToken: string;
-};
-
-export type AcceptInvitationResponse = {
-    invitation: InvitationResponse;
-    membership: MembershipResponse;
-};
-
-async function resolveOrganizationId(organizationId?: string, token?: string) {
-    return organizationId ?? getCurrentOrganizationId(token);
+export function getTeamMembers(organizationId: string) {
+    return apiRequest<TeamMember[]>(
+        `/organizations/${organizationId}/memberships`,
+        {
+            method: "GET",
+        }
+    );
 }
 
-export async function createMembership(
-    payload: CreateMembershipPayload,
-    organizationId?: string,
-    token?: string
-) {
-    const resolvedOrganizationId = await resolveOrganizationId(organizationId, token);
+export function getInvitations(organizationId: string) {
+    return apiRequest<Invitation[]>(
+        `/organizations/${organizationId}/invitations`,
+        {
+            method: "GET",
+        }
+    );
+}
 
-    return apiRequest<MembershipResponse>(
-        `/organizations/${resolvedOrganizationId}/memberships`,
+export function createInvitation(
+    organizationId: string,
+    payload: CreateInvitationPayload
+) {
+    return apiRequest<CreateInvitationResponse>(
+        `/organizations/${organizationId}/invitations`,
         {
             method: "POST",
             body: payload,
-            token,
-        }
-    );
-}
-
-export async function getMemberships(organizationId?: string, token?: string) {
-    const resolvedOrganizationId = await resolveOrganizationId(organizationId, token);
-
-    return apiRequest<MembershipResponse[]>(
-        `/organizations/${resolvedOrganizationId}/memberships`,
-        {
-            method: "GET",
-            token,
-        }
-    );
-}
-
-export function getMembership(id: string, token?: string) {
-    return apiRequest<MembershipResponse>(`/memberships/${id}`, {
-        method: "GET",
-        token,
-    });
-}
-
-export async function getTeamMembers(organizationId?: string, token?: string) {
-    const memberships = await getMemberships(organizationId, token);
-
-    return memberships.map((membership): TeamMember => ({
-        ...membership,
-        status: "ACTIVE",
-    }));
-}
-
-export async function getInvitations(organizationId?: string, token?: string) {
-    const resolvedOrganizationId = await resolveOrganizationId(organizationId, token);
-
-    return apiRequest<InvitationResponse[]>(
-        `/organizations/${resolvedOrganizationId}/invitations`,
-        {
-            method: "GET",
-            token,
-        }
-    );
-}
-
-export async function createInvitation(
-    payload: CreateInvitationPayload,
-    organizationId?: string,
-    token?: string
-) {
-    const resolvedOrganizationId = await resolveOrganizationId(organizationId, token);
-    const { email, role } = payload;
-
-    return apiRequest<CreateInvitationResponse>(
-        `/organizations/${resolvedOrganizationId}/invitations`,
-        {
-            method: "POST",
-            body: { email, role },
-            token,
-        }
-    );
-}
-
-export function acceptInvitation(tokenValue: string, token?: string) {
-    return apiRequest<AcceptInvitationResponse>("/invitations/accept", {
-        method: "POST",
-        body: { token: tokenValue },
-        token,
-    });
-}
-
-export async function revokeInvitation(
-    invitationId: string,
-    organizationId?: string,
-    token?: string
-) {
-    const resolvedOrganizationId = await resolveOrganizationId(organizationId, token);
-
-    return apiRequest<void>(
-        `/organizations/${resolvedOrganizationId}/invitations/${invitationId}`,
-        {
-            method: "DELETE",
-            token,
         }
     );
 }
