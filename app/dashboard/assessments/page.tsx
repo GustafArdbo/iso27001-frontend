@@ -212,23 +212,80 @@ function renderProfileInput(
     }
 
     if (field.type === "file") {
+        const notePrefix = "__note__:";
+        const note = selectedValues
+            .find((item) => item.startsWith(notePrefix))
+            ?.replace(notePrefix, "") ?? "";
+        const fileNames = selectedValues.filter(
+            (item) => !item.startsWith(notePrefix)
+        );
+        const updateFiles = (nextFileNames: string[], nextNote = note) => {
+            onChange([
+                ...nextFileNames,
+                ...(nextNote.trim() ? [`${notePrefix}${nextNote}`] : []),
+            ]);
+        };
+
         return (
-            <>
+            <div
+                className="assessment-file-dropzone"
+                onDragOver={(event) => event.preventDefault()}
+                onDrop={(event) => {
+                    event.preventDefault();
+                    updateFiles([
+                        ...fileNames,
+                        ...Array.from(event.dataTransfer.files).map((file) => file.name),
+                    ]);
+                }}
+            >
                 <input
+                    id={`file-${field.id}`}
                     type="file"
                     multiple
-                    onChange={(event) =>
-                        onChange(
-                            Array.from(event.target.files ?? []).map((file) => file.name)
-                        )
-                    }
+                    onChange={(event) => {
+                        updateFiles([
+                            ...fileNames,
+                            ...Array.from(event.target.files ?? []).map(
+                                (file) => file.name
+                            ),
+                        ]);
+                        event.target.value = "";
+                    }}
                 />
-                {selectedValues.length > 0 && (
-                    <p className="assessment-file-note">
-                        Selected: {selectedValues.join(", ")}
-                    </p>
+
+                <label
+                    className="assessment-file-choose"
+                    htmlFor={`file-${field.id}`}
+                >
+                    Choose Files
+                </label>
+
+                <textarea
+                    value={note}
+                    placeholder="Write notes about existing policies, risk registers, asset lists, or security documentation."
+                    onChange={(event) => updateFiles(fileNames, event.target.value)}
+                />
+
+                {fileNames.length > 0 && (
+                    <ul className="assessment-file-list">
+                        {fileNames.map((fileName) => (
+                            <li key={fileName}>
+                                <span>{fileName}</span>
+                                <button
+                                    type="button"
+                                    onClick={() =>
+                                        updateFiles(
+                                            fileNames.filter((item) => item !== fileName)
+                                        )
+                                    }
+                                >
+                                    Remove
+                                </button>
+                            </li>
+                        ))}
+                    </ul>
                 )}
-            </>
+            </div>
         );
     }
 

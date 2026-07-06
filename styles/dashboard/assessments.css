@@ -182,7 +182,7 @@
 
 .assessment-field-label:has(textarea),
 .assessment-field-label:has(.assessment-checkbox-grid),
-.assessment-field-label:has(input[type="file"]) {
+.assessment-field-label:has(.assessment-file-dropzone) {
     grid-column: 1 / -1;
     grid-template-rows: auto auto;
 }
@@ -262,6 +262,85 @@
     color: var(--color-text-muted);
     font-size: .86rem;
     font-weight: 750;
+}
+
+.assessment-file-dropzone {
+    display: grid;
+    gap: 12px;
+    min-height: 220px;
+    padding: 16px;
+    border: 1.5px dashed rgba(58, 175, 169, 0.62);
+    border-radius: 14px;
+    background: #ffffff;
+}
+
+.assessment-file-dropzone input[type="file"] {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+}
+
+.assessment-file-choose {
+    display: grid;
+    place-items: center;
+    min-height: 92px;
+    border-radius: 12px;
+    background: #e8f7f5;
+    color: var(--color-accent);
+    font-size: 1rem;
+    font-weight: 900;
+    cursor: pointer;
+}
+
+.assessment-file-dropzone textarea {
+    min-height: 96px;
+    padding: 14px;
+    border: 1px solid var(--color-border);
+    border-radius: 12px;
+    background: #ffffff;
+    color: var(--color-primary);
+    font: inherit;
+    resize: vertical;
+    box-sizing: border-box;
+}
+
+.assessment-file-list {
+    display: grid;
+    gap: 8px;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
+.assessment-file-list li {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    min-height: 40px;
+    padding: 0 12px;
+    border: 1px solid var(--color-border);
+    border-radius: 10px;
+    background: #f8fbfb;
+}
+
+.assessment-file-list span {
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.assessment-file-list button {
+    flex: 0 0 auto;
+    border: 0;
+    background: transparent;
+    color: var(--color-error);
+    font: inherit;
+    font-weight: 850;
+    cursor: pointer;
 }
 
 .assessment-question-card {
