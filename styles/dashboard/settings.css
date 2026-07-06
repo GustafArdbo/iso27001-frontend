@@ -130,6 +130,8 @@
     display: inline-flex;
     align-items: center;
     justify-content: center;
+    position: relative;
+    flex: 0 0 auto;
     width: 42px;
     height: 42px;
     min-height: 42px;
@@ -139,11 +141,31 @@
     background: linear-gradient(135deg, var(--color-accent) 0%, #2f928d 100%);
     color: #ffffff;
     font: inherit;
-    font-size: 1.35rem;
-    font-weight: 900;
-    line-height: 1;
+    font-size: 0;
+    line-height: 0;
     cursor: pointer;
     box-shadow: 0 14px 34px rgba(58, 175, 169, 0.18);
+}
+
+.support-modal-close::before,
+.support-modal-close::after {
+    content: "";
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    width: 14px;
+    height: 3px;
+    border-radius: 999px;
+    background: #ffffff;
+    transform-origin: center;
+}
+
+.support-modal-close::before {
+    transform: translate(-50%, -50%) rotate(45deg);
+}
+
+.support-modal-close::after {
+    transform: translate(-50%, -50%) rotate(-45deg);
 }
 
 .support-modal-form {
