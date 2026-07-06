@@ -84,9 +84,6 @@ export const answerScores: Record<EvaluationAnswer, number | null> = {
 
 export const companyProfileFields: ProfileField[] = [
     { id: "A1", label: "Company name", type: "text" },
-    { id: "A2", label: "Contact person", type: "text" },
-    { id: "A3", label: "Email", type: "email" },
-    { id: "A4", label: "Phone number", type: "text" },
     {
         id: "A5",
         label: "Industry",

@@ -46,36 +46,36 @@ type CategoryDefinition = {
 };
 
 const categories: CategoryDefinition[] = [
-    { id: "company_profile", label: "Company profile", chapter: "Part A" },
-    { id: "context_scope", label: "Context & scope", chapter: "Chapter 2", sectionId: "context-scope" },
-    { id: "leadership", label: "Leadership", chapter: "Chapter 3", sectionId: "leadership-governance" },
-    { id: "risk_management", label: "Risk management", chapter: "Chapter 4", sectionId: "risk-planning" },
-    { id: "support", label: "Support", chapter: "Chapter 5", sectionId: "support-documentation" },
-    { id: "operation", label: "Operation", chapter: "Chapter 6", sectionId: "operation" },
+    { id: "company_profile", label: "Company profile", chapter: "PART A" },
+    { id: "context_scope", label: "Context & scope", chapter: "PART B", sectionId: "context-scope" },
+    { id: "leadership", label: "Leadership", chapter: "PART C", sectionId: "leadership-governance" },
+    { id: "risk_management", label: "Risk management", chapter: "PART D", sectionId: "risk-planning" },
+    { id: "support", label: "Support", chapter: "PART E", sectionId: "support-documentation" },
+    { id: "operation", label: "Operation", chapter: "PART F", sectionId: "operation" },
     {
         id: "performance",
         label: "Performance",
-        chapter: "Chapter 7",
+        chapter: "PART G",
         sectionId: "performance-evaluation",
     },
-    { id: "improvement", label: "Improvement", chapter: "Chapter 8", sectionId: "improvement" },
+    { id: "improvement", label: "Improvement", chapter: "PART H", sectionId: "improvement" },
     {
         id: "organizational_controls",
         label: "Organizational controls",
-        chapter: "Chapter 9",
+        chapter: "PART I",
         sectionId: "organizational-controls",
     },
-    { id: "people_controls", label: "People controls", chapter: "Chapter 10", sectionId: "people-controls" },
+    { id: "people_controls", label: "People controls", chapter: "PART J", sectionId: "people-controls" },
     {
         id: "physical_controls",
         label: "Physical controls",
-        chapter: "Chapter 11",
+        chapter: "PART K",
         sectionId: "physical-controls",
     },
     {
         id: "technological_controls",
         label: "Technological controls",
-        chapter: "Chapter 12",
+        chapter: "PART L",
         sectionId: "technological-controls",
     },
 ];
