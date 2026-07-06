@@ -92,26 +92,37 @@
 
 .assessment-category-nav button {
     display: grid;
-    gap: 4px;
-    min-height: 62px;
-    padding: 10px 12px;
-    border: 1px solid rgba(58, 175, 169, 0.62);
-    border-radius: 12px;
+    gap: 5px;
+    min-height: 76px;
+    padding: 12px 14px;
+    border: 2px solid var(--color-accent);
+    border-radius: 999px;
     background: #ffffff !important;
     color: var(--color-primary);
     font: inherit;
-    text-align: left;
+    text-align: center;
     cursor: pointer;
     box-shadow: none !important;
 }
 
 .assessment-category-nav button.active {
     border-color: var(--color-accent);
-    background: #e8f7f5 !important;
+    background:
+        radial-gradient(circle at center, #ffffff 0 58%, #e8f7f5 59% 100%) !important;
 }
 
 .assessment-category-nav span {
-    font-size: .86rem;
+    color: var(--color-accent);
+    font-size: .72rem;
+    font-weight: 900;
+    letter-spacing: .06em;
+    line-height: 1.25;
+    text-transform: uppercase;
+}
+
+.assessment-category-nav strong {
+    color: var(--color-primary);
+    font-size: .9rem;
     font-weight: 900;
     line-height: 1.25;
 }
@@ -269,6 +280,33 @@
     gap: 10px;
 }
 
+.assessment-answer-guide {
+    display: grid;
+    grid-template-columns: repeat(5, minmax(0, 1fr));
+    gap: 10px;
+    padding: 12px;
+    border: 1px solid rgba(58, 175, 169, 0.18);
+    border-radius: 12px;
+    background: #f8fbfb;
+}
+
+.assessment-answer-guide div {
+    display: grid;
+    gap: 4px;
+    min-width: 0;
+}
+
+.assessment-answer-guide strong {
+    color: var(--color-primary);
+    font-size: .82rem;
+}
+
+.assessment-answer-guide span {
+    color: var(--color-text-muted);
+    font-size: .76rem;
+    line-height: 1.35;
+}
+
 .assessment-answer-grid label {
     display: flex;
     align-items: center;
@@ -353,6 +391,7 @@
         grid-template-columns: repeat(2, minmax(0, 1fr));
     }
 
+    .assessment-answer-guide,
     .assessment-profile-grid,
     .assessment-answer-grid {
         grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -361,6 +400,7 @@
 
 @media (max-width: 560px) {
     .assessment-category-nav,
+    .assessment-answer-guide,
     .assessment-profile-grid,
     .assessment-answer-grid {
         grid-template-columns: 1fr;

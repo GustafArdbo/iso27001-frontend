@@ -41,39 +41,52 @@ type EvaluationCategory =
 type CategoryDefinition = {
     id: EvaluationCategory;
     label: string;
+    chapter: string;
     sectionId?: string;
 };
 
 const categories: CategoryDefinition[] = [
-    { id: "company_profile", label: "Company profile" },
-    { id: "context_scope", label: "Context & scope", sectionId: "context-scope" },
-    { id: "leadership", label: "Leadership", sectionId: "leadership-governance" },
-    { id: "risk_management", label: "Risk management", sectionId: "risk-planning" },
-    { id: "support", label: "Support", sectionId: "support-documentation" },
-    { id: "operation", label: "Operation", sectionId: "operation" },
+    { id: "company_profile", label: "Company profile", chapter: "Part A" },
+    { id: "context_scope", label: "Context & scope", chapter: "Chapter 2", sectionId: "context-scope" },
+    { id: "leadership", label: "Leadership", chapter: "Chapter 3", sectionId: "leadership-governance" },
+    { id: "risk_management", label: "Risk management", chapter: "Chapter 4", sectionId: "risk-planning" },
+    { id: "support", label: "Support", chapter: "Chapter 5", sectionId: "support-documentation" },
+    { id: "operation", label: "Operation", chapter: "Chapter 6", sectionId: "operation" },
     {
         id: "performance",
         label: "Performance",
+        chapter: "Chapter 7",
         sectionId: "performance-evaluation",
     },
-    { id: "improvement", label: "Improvement", sectionId: "improvement" },
+    { id: "improvement", label: "Improvement", chapter: "Chapter 8", sectionId: "improvement" },
     {
         id: "organizational_controls",
         label: "Organizational controls",
+        chapter: "Chapter 9",
         sectionId: "organizational-controls",
     },
-    { id: "people_controls", label: "People controls", sectionId: "people-controls" },
+    { id: "people_controls", label: "People controls", chapter: "Chapter 10", sectionId: "people-controls" },
     {
         id: "physical_controls",
         label: "Physical controls",
+        chapter: "Chapter 11",
         sectionId: "physical-controls",
     },
     {
         id: "technological_controls",
         label: "Technological controls",
+        chapter: "Chapter 12",
         sectionId: "technological-controls",
     },
 ];
+
+const answerDescriptions: Record<EvaluationAnswer, string> = {
+    YES: "Exists, is documented, and is used",
+    PARTIAL: "Partly exists, but lacks documentation, ownership, or regularity",
+    NO: "Missing",
+    DONT_KNOW: "Unclear and should be investigated",
+    NOT_APPLICABLE: "Excluded from score and should be justified",
+};
 
 const emptyEvaluation: StoredEvaluation = {
     profile: {},
@@ -518,7 +531,8 @@ export default function AssessmentsPage() {
                                                 className={isActive ? "active" : ""}
                                                 onClick={() => setActiveCategory(category.id)}
                                             >
-                                                <span>{category.label}</span>
+                                                <span>{category.chapter}</span>
+                                                <strong>{category.label}</strong>
                                                 <small>
                                                     {progress?.answered ?? 0}/{progress?.total ?? 0}
                                                 </small>
@@ -580,6 +594,17 @@ export default function AssessmentsPage() {
                                                     </span>
                                                     <h3>{question.question}</h3>
                                                     <p>Example evidence: {question.evidence}</p>
+                                                </div>
+
+                                                <div className="assessment-answer-guide">
+                                                    {(Object.keys(answerLabels) as EvaluationAnswer[]).map(
+                                                        (answer) => (
+                                                            <div key={answer}>
+                                                                <strong>{answerLabels[answer]}</strong>
+                                                                <span>{answerDescriptions[answer]}</span>
+                                                            </div>
+                                                        )
+                                                    )}
                                                 </div>
 
                                                 <div className="assessment-answer-grid">
