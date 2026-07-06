@@ -1,24 +1,32 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import AppTopbar from "@/components/AppTopbar";
 import {
     AppEmptyState,
     AppErrorState,
     AppLoadingState,
 } from "@/components/AppDataState";
-import { getTasks, updateTaskStatus, type Task } from "@/lib/tasks";
+import {
+    getCurrentOrganizationAssessments,
+    type AssessmentResponse,
+} from "@/lib/assessments";
+import type { StoredEvaluation } from "@/lib/iso27001Evaluation";
+import {
+    buildEvaluationDashboard,
+    getPriorityPillClass,
+    loadStoredEvaluation,
+    saveStoredEvaluation,
+    taskStatusToAnswer,
+    type EvaluationDashboardData,
+    type EvaluationTaskRow,
+    type TaskStatus,
+} from "@/lib/iso27001EvaluationDashboard";
 
 type PageStatus = "loading" | "ready" | "error";
 
 function getErrorMessage(error: unknown) {
     return error instanceof Error ? error.message : "Could not load tasks.";
-}
-
-function priorityPill(priority: Task["priority"]) {
-    if (priority === "High") return "error";
-    if (priority === "Medium") return "warning";
-    return "good";
 }
 
 function formatDueDate(value: string) {
@@ -32,54 +40,70 @@ function formatDueDate(value: string) {
 export default function TasksPage() {
     const [status, setStatus] = useState<PageStatus>("loading");
     const [message, setMessage] = useState("");
-    const [tasks, setTasks] = useState<Task[]>([]);
-    const [updatingId, setUpdatingId] = useState<string | null>(null);
-
-    async function loadTasks() {
-        try {
-            setStatus("loading");
-            setMessage("");
-            setTasks(await getTasks());
-            setStatus("ready");
-        } catch (error) {
-            console.error(error);
-            setMessage(getErrorMessage(error));
-            setStatus("error");
-        }
-    }
+    const [assessment, setAssessment] = useState<AssessmentResponse | null>(null);
+    const [evaluation, setEvaluation] = useState<StoredEvaluation | null>(null);
 
     useEffect(() => {
-        const timeoutId = window.setTimeout(() => {
-            void loadTasks();
-        }, 0);
+        let active = true;
 
-        return () => window.clearTimeout(timeoutId);
+        async function loadTasks() {
+            try {
+                setStatus("loading");
+                setMessage("");
+
+                const assessments = await getCurrentOrganizationAssessments();
+                const latestAssessment = assessments[0] ?? null;
+                const storedEvaluation = latestAssessment
+                    ? loadStoredEvaluation(latestAssessment.id)
+                    : null;
+
+                if (!active) return;
+
+                setAssessment(latestAssessment);
+                setEvaluation(storedEvaluation);
+                setStatus("ready");
+            } catch (error) {
+                if (!active) return;
+
+                console.error(error);
+                setMessage(getErrorMessage(error));
+                setStatus("error");
+            }
+        }
+
+        loadTasks();
+
+        return () => {
+            active = false;
+        };
     }, []);
 
-    async function handleStatusChange(task: Task, nextStatus: Task["status"]) {
-        try {
-            setUpdatingId(task.id);
-            const updatedTask = await updateTaskStatus(task.id, nextStatus);
+    const dashboard = useMemo<EvaluationDashboardData | null>(
+        () => (evaluation ? buildEvaluationDashboard(evaluation) : null),
+        [evaluation]
+    );
+    const tasks = dashboard?.tasks ?? [];
 
-            setTasks((currentTasks) =>
-                currentTasks.map((currentTask) =>
-                    currentTask.id === task.id ? updatedTask : currentTask
-                )
-            );
-        } catch (error) {
-            console.error(error);
-            setMessage(getErrorMessage(error));
-            setStatus("error");
-        } finally {
-            setUpdatingId(null);
-        }
+    function handleStatusChange(task: EvaluationTaskRow, nextStatus: TaskStatus) {
+        if (!assessment || !evaluation) return;
+
+        const nextEvaluation = {
+            ...evaluation,
+            answers: {
+                ...evaluation.answers,
+                [task.questionId]: taskStatusToAnswer(nextStatus),
+            },
+        };
+
+        setEvaluation(nextEvaluation);
+        saveStoredEvaluation(assessment.id, nextEvaluation);
     }
 
     return (
         <main className="app-main tasks-page">
             <AppTopbar
                 title="Tasks"
-                description="Manage assigned actions, due dates, priorities, and remediation work."
+                description="Manage remediation work generated from assessment answers."
             />
 
             {status === "loading" && <AppLoadingState title="Loading tasks" />}
@@ -88,10 +112,17 @@ export default function TasksPage() {
                 <AppErrorState title="Could not load tasks" message={message} />
             )}
 
-            {status === "ready" && !tasks.length && (
+            {status === "ready" && (!assessment || !dashboard) && (
+                <AppEmptyState
+                    title="No assessment"
+                    message="Create an assessment before reviewing remediation tasks."
+                />
+            )}
+
+            {status === "ready" && dashboard && !tasks.length && (
                 <AppEmptyState
                     title="No tasks"
-                    message="Tasks appear after an assessment has controls to review."
+                    message="Tasks appear when assessment answers identify gaps or partial implementation."
                 />
             )}
 
@@ -108,23 +139,26 @@ export default function TasksPage() {
                                         task.status === "Done" ? "task-check" : "task-empty"
                                     }
                                 >
-                                    {task.status === "Done" ? "✓" : ""}
+                                    {task.status === "Done" ? "OK" : ""}
                                 </span>
                                 <div>
                                     <strong>{task.title}</strong>
                                     <p>Due {formatDueDate(task.dueDate)}</p>
                                 </div>
-                                <em className={`app-pill ${priorityPill(task.priority)}`}>
+                                <em
+                                    className={`app-pill ${getPriorityPillClass(
+                                        task.priority
+                                    )}`}
+                                >
                                     {task.priority}
                                 </em>
                                 <select
                                     aria-label={`Status for ${task.title}`}
                                     value={task.status}
-                                    disabled={updatingId === task.id}
                                     onChange={(event) =>
                                         handleStatusChange(
                                             task,
-                                            event.target.value as Task["status"]
+                                            event.target.value as TaskStatus
                                         )
                                     }
                                 >

@@ -7,55 +7,31 @@ import {
     AppErrorState,
     AppLoadingState,
 } from "@/components/AppDataState";
-import { getControls, type ControlResponse } from "@/lib/controls";
 import {
-    getAssessmentQuestions,
-    getLatestAssessment,
-    type AssessmentQuestionResponse,
+    getCurrentOrganizationAssessments,
+    type AssessmentResponse,
 } from "@/lib/assessments";
+import { answerLabels, type EvaluationAnswer } from "@/lib/iso27001Evaluation";
+import {
+    buildEvaluationDashboard,
+    getStatusPillClass,
+    loadStoredEvaluation,
+    saveStoredEvaluation,
+    type EvaluationDashboardData,
+} from "@/lib/iso27001EvaluationDashboard";
+import type { StoredEvaluation } from "@/lib/iso27001Evaluation";
 
 type PageStatus = "loading" | "ready" | "error";
-
-type ControlRow = ControlResponse & {
-    answer: AssessmentQuestionResponse["answer"] | null;
-    status: "Implemented" | "In progress" | "Not started";
-    progress: number;
-};
-
-const domainLabels: Record<string, string> = {
-    ORGANIZATIONAL: "Organizational",
-    PEOPLE: "People",
-    PHYSICAL: "Physical",
-    TECHNOLOGICAL: "Technological",
-};
 
 function getErrorMessage(error: unknown) {
     return error instanceof Error ? error.message : "Could not load controls.";
 }
 
-function toControlStatus(answer: AssessmentQuestionResponse["answer"] | null) {
-    if (answer === "YES" || answer === "NOT_APPLICABLE") {
-        return "Implemented" as const;
-    }
-
-    if (answer === "PARTIAL") {
-        return "In progress" as const;
-    }
-
-    return "Not started" as const;
-}
-
-function statusPill(status: ControlRow["status"]) {
-    if (status === "Implemented") return "good";
-    if (status === "In progress") return "warning";
-    return "neutral";
-}
-
 export default function ControlsPage() {
     const [status, setStatus] = useState<PageStatus>("loading");
     const [message, setMessage] = useState("");
-    const [controls, setControls] = useState<ControlResponse[]>([]);
-    const [questions, setQuestions] = useState<AssessmentQuestionResponse[]>([]);
+    const [assessment, setAssessment] = useState<AssessmentResponse | null>(null);
+    const [evaluation, setEvaluation] = useState<StoredEvaluation | null>(null);
 
     useEffect(() => {
         let active = true;
@@ -65,18 +41,16 @@ export default function ControlsPage() {
                 setStatus("loading");
                 setMessage("");
 
-                const [controlData, latestAssessment] = await Promise.all([
-                    getControls(),
-                    getLatestAssessment(),
-                ]);
-                const questionData = latestAssessment
-                    ? await getAssessmentQuestions(latestAssessment.id)
-                    : [];
+                const assessments = await getCurrentOrganizationAssessments();
+                const latestAssessment = assessments[0] ?? null;
+                const storedEvaluation = latestAssessment
+                    ? loadStoredEvaluation(latestAssessment.id)
+                    : null;
 
                 if (!active) return;
 
-                setControls(controlData);
-                setQuestions(questionData);
+                setAssessment(latestAssessment);
+                setEvaluation(storedEvaluation);
                 setStatus("ready");
             } catch (error) {
                 if (!active) return;
@@ -94,50 +68,31 @@ export default function ControlsPage() {
         };
     }, []);
 
-    const rows = useMemo<ControlRow[]>(() => {
-        const questionByControlId = new Map(
-            questions.map((question) => [question.controlId, question])
-        );
-
-        return controls.map((control) => {
-            const question = questionByControlId.get(control.id);
-            const controlStatus = toControlStatus(question?.answer ?? null);
-
-            return {
-                ...control,
-                answer: question?.answer ?? null,
-                status: controlStatus,
-                progress:
-                    controlStatus === "Implemented"
-                        ? 100
-                        : controlStatus === "In progress"
-                          ? 50
-                          : 0,
-            };
-        });
-    }, [controls, questions]);
-
-    const counts = useMemo(
-        () =>
-            rows.reduce(
-                (accumulator, row) => {
-                    accumulator[row.status] += 1;
-                    return accumulator;
-                },
-                {
-                    Implemented: 0,
-                    "In progress": 0,
-                    "Not started": 0,
-                }
-            ),
-        [rows]
+    const dashboard = useMemo<EvaluationDashboardData | null>(
+        () => (evaluation ? buildEvaluationDashboard(evaluation) : null),
+        [evaluation]
     );
+
+    function updateAnswer(questionId: string, answer: EvaluationAnswer | "") {
+        if (!assessment || !evaluation) return;
+
+        const nextEvaluation = {
+            ...evaluation,
+            answers: {
+                ...evaluation.answers,
+                [questionId]: answer,
+            },
+        };
+
+        setEvaluation(nextEvaluation);
+        saveStoredEvaluation(assessment.id, nextEvaluation);
+    }
 
     return (
         <main className="app-main controls-page">
             <AppTopbar
                 title="Controls"
-                description="Manage ISO 27001 controls, ownership, status, and implementation progress."
+                description="Manage ISO 27001 controls from the assessment answers."
             />
 
             {status === "loading" && <AppLoadingState title="Loading controls" />}
@@ -146,55 +101,91 @@ export default function ControlsPage() {
                 <AppErrorState title="Could not load controls" message={message} />
             )}
 
-            {status === "ready" && !rows.length && (
-                <AppEmptyState title="No controls" message="No controls were returned by the API." />
+            {status === "ready" && (!assessment || !dashboard) && (
+                <AppEmptyState
+                    title="No assessment"
+                    message="Create an assessment before reviewing controls."
+                />
             )}
 
-            {status === "ready" && rows.length > 0 && (
+            {status === "ready" && dashboard && (
                 <>
                     <section className="app-page-grid">
                         <article className="app-card">
                             <h2>Implemented</h2>
-                            <strong className="control-number">{counts.Implemented}</strong>
-                            <p>Controls answered as ready or not applicable.</p>
+                            <strong className="control-number">
+                                {dashboard.controls.implemented}
+                            </strong>
+                            <p>Questions answered as ready or not applicable.</p>
                         </article>
                         <article className="app-card">
                             <h2>In progress</h2>
                             <strong className="control-number">
-                                {counts["In progress"]}
+                                {dashboard.controls.inProgress}
                             </strong>
-                            <p>Controls with partial implementation answers.</p>
+                            <p>Questions answered as partially implemented.</p>
                         </article>
                         <article className="app-card">
                             <h2>Not started</h2>
                             <strong className="control-number">
-                                {counts["Not started"]}
+                                {dashboard.controls.notStarted}
                             </strong>
-                            <p>Controls without a readiness answer yet.</p>
+                            <p>Questions without a ready implementation answer.</p>
                         </article>
                     </section>
 
                     <section className="app-card app-table-card">
                         <div className="app-card-header">
-                            <h2>Control library</h2>
+                            <h2>Control questions</h2>
                         </div>
                         <table className="app-table">
                             <thead>
                                 <tr>
                                     <th>Control</th>
-                                    <th>Domain</th>
+                                    <th>Section</th>
+                                    <th>Mapping</th>
+                                    <th>Answer</th>
                                     <th>Status</th>
                                     <th>Progress</th>
                                 </tr>
                             </thead>
                             <tbody>
-                                {rows.map((control) => (
+                                {dashboard.questions.map((control) => (
                                     <tr key={control.id}>
-                                        <td>{control.title}</td>
-                                        <td>{domainLabels[control.domain] ?? control.domain}</td>
                                         <td>
-                                            <span className={`app-pill ${statusPill(control.status)}`}>
-                                                {control.status}
+                                            <strong>{control.id}</strong>
+                                            <p className="app-muted-text">{control.question}</p>
+                                        </td>
+                                        <td>{control.section}</td>
+                                        <td>{control.mapping}</td>
+                                        <td>
+                                            <select
+                                                className="dashboard-inline-select"
+                                                value={control.answer}
+                                                onChange={(event) =>
+                                                    updateAnswer(
+                                                        control.id,
+                                                        event.target.value as EvaluationAnswer | ""
+                                                    )
+                                                }
+                                            >
+                                                <option value="">Unanswered</option>
+                                                {(Object.keys(answerLabels) as EvaluationAnswer[]).map(
+                                                    (answer) => (
+                                                        <option value={answer} key={answer}>
+                                                            {answerLabels[answer]}
+                                                        </option>
+                                                    )
+                                                )}
+                                            </select>
+                                        </td>
+                                        <td>
+                                            <span
+                                                className={`app-pill ${getStatusPillClass(
+                                                    control.controlStatus
+                                                )}`}
+                                            >
+                                                {control.controlStatus}
                                             </span>
                                         </td>
                                         <td>{control.progress}%</td>

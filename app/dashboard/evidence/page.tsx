@@ -7,18 +7,23 @@ import {
     AppErrorState,
     AppLoadingState,
 } from "@/components/AppDataState";
-import { getEvidence, type EvidenceItem } from "@/lib/evidence";
+import {
+    getCurrentOrganizationAssessments,
+    type AssessmentResponse,
+} from "@/lib/assessments";
+import type { StoredEvaluation } from "@/lib/iso27001Evaluation";
+import {
+    buildEvaluationDashboard,
+    getEvidencePillClass,
+    loadStoredEvaluation,
+    saveStoredEvaluation,
+    type EvaluationDashboardData,
+} from "@/lib/iso27001EvaluationDashboard";
 
 type PageStatus = "loading" | "ready" | "error";
 
 function getErrorMessage(error: unknown) {
     return error instanceof Error ? error.message : "Could not load evidence.";
-}
-
-function evidencePill(status: EvidenceItem["status"]) {
-    if (status === "Uploaded") return "good";
-    if (status === "Expiring") return "warning";
-    return "error";
 }
 
 function formatDate(value: string) {
@@ -32,7 +37,8 @@ function formatDate(value: string) {
 export default function EvidencePage() {
     const [status, setStatus] = useState<PageStatus>("loading");
     const [message, setMessage] = useState("");
-    const [evidence, setEvidence] = useState<EvidenceItem[]>([]);
+    const [assessment, setAssessment] = useState<AssessmentResponse | null>(null);
+    const [evaluation, setEvaluation] = useState<StoredEvaluation | null>(null);
 
     useEffect(() => {
         let active = true;
@@ -41,11 +47,17 @@ export default function EvidencePage() {
             try {
                 setStatus("loading");
                 setMessage("");
-                const evidenceData = await getEvidence();
+
+                const assessments = await getCurrentOrganizationAssessments();
+                const latestAssessment = assessments[0] ?? null;
+                const storedEvaluation = latestAssessment
+                    ? loadStoredEvaluation(latestAssessment.id)
+                    : null;
 
                 if (!active) return;
 
-                setEvidence(evidenceData);
+                setAssessment(latestAssessment);
+                setEvaluation(storedEvaluation);
                 setStatus("ready");
             } catch (error) {
                 if (!active) return;
@@ -63,23 +75,31 @@ export default function EvidencePage() {
         };
     }, []);
 
-    const counts = useMemo(
-        () =>
-            evidence.reduce(
-                (accumulator, item) => {
-                    accumulator[item.status] += 1;
-                    return accumulator;
-                },
-                { Uploaded: 0, Missing: 0, Expiring: 0 }
-            ),
-        [evidence]
+    const dashboard = useMemo<EvaluationDashboardData | null>(
+        () => (evaluation ? buildEvaluationDashboard(evaluation) : null),
+        [evaluation]
     );
+
+    function updateEvidenceNote(controlCode: string, comment: string) {
+        if (!assessment || !evaluation) return;
+
+        const nextEvaluation = {
+            ...evaluation,
+            comments: {
+                ...evaluation.comments,
+                [controlCode]: comment,
+            },
+        };
+
+        setEvaluation(nextEvaluation);
+        saveStoredEvaluation(assessment.id, nextEvaluation);
+    }
 
     return (
         <main className="app-main evidence-page">
             <AppTopbar
                 title="Evidence"
-                description="Collect, review, and organize audit evidence for your controls."
+                description="Collect, review, and organize audit evidence from assessment questions."
             />
 
             {status === "loading" && <AppLoadingState title="Loading evidence" />}
@@ -88,27 +108,27 @@ export default function EvidencePage() {
                 <AppErrorState title="Could not load evidence" message={message} />
             )}
 
-            {status === "ready" && !evidence.length && (
+            {status === "ready" && (!assessment || !dashboard) && (
                 <AppEmptyState
-                    title="No evidence"
-                    message="Evidence appears after an assessment has controls to review."
+                    title="No assessment"
+                    message="Create an assessment before collecting evidence."
                 />
             )}
 
-            {status === "ready" && evidence.length > 0 && (
+            {status === "ready" && dashboard && (
                 <>
                     <section className="app-page-grid">
                         <article className="app-card evidence-stat">
-                            <strong>{counts.Uploaded}</strong>
+                            <strong>{dashboard.evidenceCounts.Uploaded}</strong>
                             <span>Uploaded</span>
                         </article>
                         <article className="app-card evidence-stat">
-                            <strong>{counts.Missing}</strong>
+                            <strong>{dashboard.evidenceCounts.Missing}</strong>
                             <span>Missing</span>
                         </article>
                         <article className="app-card evidence-stat">
-                            <strong>{counts.Expiring}</strong>
-                            <span>Expiring soon</span>
+                            <strong>{dashboard.evidenceCounts.Expiring}</strong>
+                            <span>Needs review</span>
                         </article>
                     </section>
                     <section className="app-card app-table-card">
@@ -123,20 +143,38 @@ export default function EvidencePage() {
                                     <th>Owner</th>
                                     <th>Status</th>
                                     <th>Updated</th>
+                                    <th>Notes</th>
                                 </tr>
                             </thead>
                             <tbody>
-                                {evidence.map((item) => (
+                                {dashboard.evidence.map((item) => (
                                     <tr key={item.id}>
                                         <td>{item.title}</td>
                                         <td>{item.controlCode}</td>
                                         <td>{item.owner}</td>
                                         <td>
-                                            <span className={`app-pill ${evidencePill(item.status)}`}>
+                                            <span
+                                                className={`app-pill ${getEvidencePillClass(
+                                                    item.status
+                                                )}`}
+                                            >
                                                 {item.status}
                                             </span>
                                         </td>
                                         <td>{formatDate(item.updatedAt)}</td>
+                                        <td>
+                                            <textarea
+                                                className="dashboard-inline-textarea"
+                                                value={item.comment}
+                                                placeholder="Add evidence notes"
+                                                onChange={(event) =>
+                                                    updateEvidenceNote(
+                                                        item.controlCode,
+                                                        event.target.value
+                                                    )
+                                                }
+                                            />
+                                        </td>
                                     </tr>
                                 ))}
                             </tbody>

@@ -8,37 +8,24 @@ import {
     AppErrorState,
     AppLoadingState,
 } from "@/components/AppDataState";
-import { getDashboardSummary, type DashboardSummary } from "@/lib/dashboard";
-import { getTasks, type Task } from "@/lib/tasks";
 import {
-    getAssessmentQuestions,
-    getLatestAssessment,
-    getLatestAssessmentSummary,
-    type AssessmentQuestionResponse,
-    type AssessmentSummaryResponse,
+    getCurrentOrganizationAssessments,
+    type AssessmentResponse,
 } from "@/lib/assessments";
-
-type DashboardData = {
-    summary: DashboardSummary;
-    tasks: Task[];
-    assessmentSummary: AssessmentSummaryResponse | null;
-    questions: AssessmentQuestionResponse[];
-};
+import {
+    buildEvaluationDashboard,
+    loadStoredEvaluation,
+    type EvaluationDashboardData,
+    type TaskPriority,
+} from "@/lib/iso27001EvaluationDashboard";
 
 type PageStatus = "loading" | "ready" | "error";
-
-const domainLabels: Record<string, string> = {
-    ORGANIZATIONAL: "Organizational controls",
-    PEOPLE: "People controls",
-    PHYSICAL: "Physical controls",
-    TECHNOLOGICAL: "Technological controls",
-};
 
 function getErrorMessage(error: unknown) {
     return error instanceof Error ? error.message : "Could not load dashboard data.";
 }
 
-function priorityClass(priority: Task["priority"]) {
+function priorityClass(priority: TaskPriority) {
     if (priority === "High") return "high-tag";
     if (priority === "Medium") return "medium-tag";
     return "low-tag";
@@ -52,16 +39,11 @@ function formatDueDate(value: string) {
     }).format(new Date(value));
 }
 
-function complianceLabel(score: number) {
-    if (score >= 80) return "Good";
-    if (score >= 50) return "In progress";
-    return "Needs work";
-}
-
 export default function DashboardPage() {
     const [status, setStatus] = useState<PageStatus>("loading");
     const [message, setMessage] = useState("");
-    const [data, setData] = useState<DashboardData | null>(null);
+    const [assessments, setAssessments] = useState<AssessmentResponse[]>([]);
+    const [dashboard, setDashboard] = useState<EvaluationDashboardData | null>(null);
 
     useEffect(() => {
         let active = true;
@@ -71,21 +53,16 @@ export default function DashboardPage() {
                 setStatus("loading");
                 setMessage("");
 
-                const [summary, tasks, assessmentSummary, latestAssessment] =
-                    await Promise.all([
-                        getDashboardSummary(),
-                        getTasks(),
-                        getLatestAssessmentSummary(),
-                        getLatestAssessment(),
-                    ]);
-
-                const questions = latestAssessment
-                    ? await getAssessmentQuestions(latestAssessment.id)
-                    : [];
+                const assessmentData = await getCurrentOrganizationAssessments();
+                const latestAssessmentId = assessmentData[0]?.id ?? "";
+                const evaluation = loadStoredEvaluation(latestAssessmentId);
 
                 if (!active) return;
 
-                setData({ summary, tasks, assessmentSummary, questions });
+                setAssessments(assessmentData);
+                setDashboard(
+                    latestAssessmentId ? buildEvaluationDashboard(evaluation) : null
+                );
                 setStatus("ready");
             } catch (error) {
                 if (!active) return;
@@ -103,31 +80,18 @@ export default function DashboardPage() {
         };
     }, []);
 
-    const domainProgress = useMemo(() => {
-        if (!data?.questions.length) return [];
-
-        const grouped = data.questions.reduce<
-            Record<string, { total: number; ready: number }>
-        >((accumulator, question) => {
-            const current = accumulator[question.domain] ?? { total: 0, ready: 0 };
-            current.total += 1;
-
-            if (question.answer === "YES" || question.answer === "NOT_APPLICABLE") {
-                current.ready += 1;
-            }
-
-            accumulator[question.domain] = current;
-            return accumulator;
-        }, {});
-
-        return Object.entries(grouped)
-            .map(([domain, value]) => ({
-                domain,
-                label: domainLabels[domain] ?? domain,
-                progress: value.total ? Math.round((value.ready / value.total) * 100) : 0,
-            }))
-            .sort((left, right) => right.progress - left.progress);
-    }, [data]);
+    const recentTasks = useMemo(
+        () => dashboard?.tasks.slice(0, 3) ?? [],
+        [dashboard]
+    );
+    const topSections = useMemo(
+        () =>
+            dashboard?.sectionProgress
+                .filter((section) => section.total > 0)
+                .sort((left, right) => right.progress - left.progress)
+                .slice(0, 6) ?? [],
+        [dashboard]
+    );
 
     if (status === "loading") {
         return (
@@ -153,22 +117,23 @@ export default function DashboardPage() {
         );
     }
 
-    if (!data) {
+    if (!assessments.length || !dashboard) {
         return (
             <main className="app-main">
                 <AppTopbar
                     title="Dashboard"
                     description="Welcome back! Here is your compliance overview."
                 />
-                <AppEmptyState title="No dashboard data" />
+                <AppEmptyState
+                    title="No assessment data"
+                    message="Create an assessment and answer the ISO 27001 form to populate the dashboard."
+                />
             </main>
         );
     }
 
-    const { summary, tasks, assessmentSummary } = data;
-    const score = Math.max(0, Math.min(summary.overallCompliance, 100));
-    const scoreLabel = complianceLabel(score);
-    const recentTasks = tasks.slice(0, 3);
+    const score = Math.max(0, Math.min(dashboard.score.percentage, 100));
+    const scoreLabel = dashboard.score.readinessLevel;
 
     return (
         <main className="app-main">
@@ -204,25 +169,25 @@ export default function DashboardPage() {
 
                     <div className="app-status-list">
                         <div className="app-status-row">
-                            <span className="status-dot done">✓</span>
+                            <span className="status-dot done">OK</span>
                             <span>Implemented</span>
-                            <strong>{summary.controls.implemented}</strong>
+                            <strong>{dashboard.controls.implemented}</strong>
                         </div>
                         <div className="app-status-row">
                             <span className="status-dot progress"></span>
                             <span>In progress</span>
-                            <strong>{summary.controls.inProgress}</strong>
+                            <strong>{dashboard.controls.inProgress}</strong>
                         </div>
                         <div className="app-status-row">
                             <span className="status-dot empty"></span>
                             <span>Not started</span>
-                            <strong>{summary.controls.notStarted}</strong>
+                            <strong>{dashboard.controls.notStarted}</strong>
                         </div>
                     </div>
 
                     <div className="app-total-row">
                         <span>Total controls</span>
-                        <strong>{summary.controls.total}</strong>
+                        <strong>{dashboard.controls.total}</strong>
                     </div>
                 </article>
 
@@ -232,20 +197,20 @@ export default function DashboardPage() {
                     </div>
                     <div className="risk-list">
                         <div className="risk-row">
-                            <strong>{summary.risks.high}</strong>
+                            <strong>{dashboard.riskCounts.High}</strong>
                             <span className="high">High</span>
                         </div>
                         <div className="risk-row">
-                            <strong>{summary.risks.medium}</strong>
+                            <strong>{dashboard.riskCounts.Medium}</strong>
                             <span className="medium">Medium</span>
                         </div>
                         <div className="risk-row">
-                            <strong>{summary.risks.low}</strong>
+                            <strong>{dashboard.riskCounts.Low}</strong>
                             <span className="low">Low</span>
                         </div>
                     </div>
                     <Link href="/dashboard/risks" className="dash-link">
-                        View risk register →
+                        View risk register -&gt;
                     </Link>
                 </article>
             </section>
@@ -255,34 +220,28 @@ export default function DashboardPage() {
                     <div className="app-card-header">
                         <h2>Top control domains</h2>
                         <Link href="/dashboard/controls" className="dash-link">
-                            View all controls →
+                            View all controls -&gt;
                         </Link>
                     </div>
 
-                    {domainProgress.length ? (
-                        <div className="control-domain-list">
-                            {domainProgress.map((domain) => (
-                                <div className="app-bar-row" key={domain.domain}>
-                                    <span>{domain.label}</span>
-                                    <div>
-                                        <i style={{ width: `${domain.progress}%` }}></i>
-                                    </div>
-                                    <strong>{domain.progress}%</strong>
+                    <div className="control-domain-list">
+                        {topSections.map((section) => (
+                            <div className="app-bar-row" key={section.id}>
+                                <span>{section.title}</span>
+                                <div>
+                                    <i style={{ width: `${section.progress}%` }}></i>
                                 </div>
-                            ))}
-                        </div>
-                    ) : (
-                        <p className="app-muted-text">
-                            Domain progress appears after an assessment has questions.
-                        </p>
-                    )}
+                                <strong>{section.progress}%</strong>
+                            </div>
+                        ))}
+                    </div>
                 </article>
 
                 <article className="app-card">
                     <div className="app-card-header">
                         <h2>Recent tasks</h2>
                         <Link href="/dashboard/tasks" className="dash-link">
-                            View all →
+                            View all -&gt;
                         </Link>
                     </div>
 
@@ -290,9 +249,7 @@ export default function DashboardPage() {
                         <div className="app-task-list">
                             {recentTasks.map((task) => (
                                 <div className="task-row" key={task.id}>
-                                    <span className={task.status === "Done" ? "task-check" : "task-empty"}>
-                                        {task.status === "Done" ? "✓" : ""}
-                                    </span>
+                                    <span className="task-empty"></span>
                                     <div>
                                         <strong>{task.title}</strong>
                                         <p>Due {formatDueDate(task.dueDate)}</p>
@@ -304,7 +261,9 @@ export default function DashboardPage() {
                             ))}
                         </div>
                     ) : (
-                        <p className="app-muted-text">No tasks are available.</p>
+                        <p className="app-muted-text">
+                            No remediation tasks. Add assessment answers to generate work.
+                        </p>
                     )}
                 </article>
             </section>
@@ -314,34 +273,28 @@ export default function DashboardPage() {
                     <div className="app-card-header">
                         <h2>Assessment progress</h2>
                     </div>
-                    {assessmentSummary ? (
-                        <>
-                            <div className="assessment-list">
-                                <div>
-                                    <strong>{assessmentSummary.name}</strong>
-                                    <p>
-                                        {assessmentSummary.answeredControls} of{" "}
-                                        {assessmentSummary.totalControls} controls answered
-                                    </p>
-                                </div>
-                                <div className="mini-progress">
-                                    <span
-                                        style={{
-                                            width: `${assessmentSummary.completionPercentage}%`,
-                                        }}
-                                    ></span>
-                                </div>
-                            </div>
-                            <Link
-                                href="/dashboard/assessments"
-                                className="landing-button primary app-small-button"
-                            >
-                                Continue assessment
-                            </Link>
-                        </>
-                    ) : (
-                        <p className="app-muted-text">No assessment is available yet.</p>
-                    )}
+                    <div className="assessment-list">
+                        <div>
+                            <strong>{assessments[0]?.name}</strong>
+                            <p>
+                                {dashboard.score.answeredCount} of{" "}
+                                {dashboard.score.totalQuestions} questions answered
+                            </p>
+                        </div>
+                        <div className="mini-progress">
+                            <span
+                                style={{
+                                    width: `${dashboard.score.totalQuestions ? Math.round((dashboard.score.answeredCount / dashboard.score.totalQuestions) * 100) : 0}%`,
+                                }}
+                            ></span>
+                        </div>
+                    </div>
+                    <Link
+                        href="/dashboard/assessments"
+                        className="landing-button primary app-small-button"
+                    >
+                        Continue assessment
+                    </Link>
                 </article>
 
                 <article className="app-card">
@@ -350,15 +303,15 @@ export default function DashboardPage() {
                     </div>
                     <div className="evidence-stats">
                         <div>
-                            <strong>{summary.evidence.uploaded}</strong>
+                            <strong>{dashboard.evidenceCounts.Uploaded}</strong>
                             <span>Uploaded</span>
                         </div>
                         <div>
-                            <strong>{summary.evidence.missing}</strong>
+                            <strong>{dashboard.evidenceCounts.Missing}</strong>
                             <span>Missing</span>
                         </div>
                         <div>
-                            <strong>{summary.evidence.expiring}</strong>
+                            <strong>{dashboard.evidenceCounts.Expiring}</strong>
                             <span>Expiring</span>
                         </div>
                     </div>

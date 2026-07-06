@@ -21,6 +21,11 @@ import {
     type ProfileField,
     type StoredEvaluation,
 } from "@/lib/iso27001Evaluation";
+import {
+    emptyStoredEvaluation,
+    loadStoredEvaluation,
+    saveStoredEvaluation,
+} from "@/lib/iso27001EvaluationDashboard";
 
 type PageStatus = "loading" | "ready" | "error";
 type SaveStatus = "idle" | "saving" | "success" | "error";
@@ -88,13 +93,6 @@ const answerDescriptions: Record<EvaluationAnswer, string> = {
     NOT_APPLICABLE: "Excluded from score and should be justified",
 };
 
-const emptyEvaluation: StoredEvaluation = {
-    profile: {},
-    answers: {},
-    comments: {},
-    report: {},
-};
-
 function getErrorMessage(error: unknown) {
     return error instanceof Error ? error.message : "Could not load assessments.";
 }
@@ -111,31 +109,6 @@ function formatDate(value: string) {
         day: "numeric",
         year: "numeric",
     }).format(new Date(value));
-}
-
-function storageKey(assessmentId: string) {
-    return `complypilot:iso27001-evaluation:${assessmentId}`;
-}
-
-function loadStoredEvaluation(assessmentId: string): StoredEvaluation {
-    if (!assessmentId || typeof window === "undefined") {
-        return emptyEvaluation;
-    }
-
-    const stored = window.localStorage.getItem(storageKey(assessmentId));
-
-    if (!stored) {
-        return emptyEvaluation;
-    }
-
-    try {
-        return {
-            ...emptyEvaluation,
-            ...JSON.parse(stored),
-        };
-    } catch {
-        return emptyEvaluation;
-    }
 }
 
 function renderProfileInput(
@@ -306,7 +279,7 @@ export default function AssessmentsPage() {
     const [assessments, setAssessments] = useState<AssessmentResponse[]>([]);
     const [selectedAssessmentId, setSelectedAssessmentId] = useState("");
     const [evaluation, setEvaluation] =
-        useState<StoredEvaluation>(emptyEvaluation);
+        useState<StoredEvaluation>(emptyStoredEvaluation);
     const [creating, setCreating] = useState(false);
     const [activeCategory, setActiveCategory] =
         useState<EvaluationCategory>("company_profile");
@@ -418,10 +391,7 @@ export default function AssessmentsPage() {
 
         try {
             setSaveStatus("saving");
-            window.localStorage.setItem(
-                storageKey(selectedAssessmentId),
-                JSON.stringify(evaluation)
-            );
+            saveStoredEvaluation(selectedAssessmentId, evaluation);
             setSaveStatus("success");
             setSaveMessage("Evaluation saved. The compliance score has been updated.");
         } catch (error) {

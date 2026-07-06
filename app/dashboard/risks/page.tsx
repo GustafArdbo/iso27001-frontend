@@ -7,7 +7,16 @@ import {
     AppErrorState,
     AppLoadingState,
 } from "@/components/AppDataState";
-import { getRisks, type Risk } from "@/lib/risks";
+import {
+    getCurrentOrganizationAssessments,
+    type AssessmentResponse,
+} from "@/lib/assessments";
+import {
+    buildEvaluationDashboard,
+    getPriorityPillClass,
+    loadStoredEvaluation,
+    type EvaluationDashboardData,
+} from "@/lib/iso27001EvaluationDashboard";
 
 type PageStatus = "loading" | "ready" | "error";
 
@@ -15,16 +24,11 @@ function getErrorMessage(error: unknown) {
     return error instanceof Error ? error.message : "Could not load risks.";
 }
 
-function severityPill(severity: Risk["severity"]) {
-    if (severity === "High") return "error";
-    if (severity === "Medium") return "warning";
-    return "good";
-}
-
 export default function RisksPage() {
     const [status, setStatus] = useState<PageStatus>("loading");
     const [message, setMessage] = useState("");
-    const [risks, setRisks] = useState<Risk[]>([]);
+    const [assessment, setAssessment] = useState<AssessmentResponse | null>(null);
+    const [dashboard, setDashboard] = useState<EvaluationDashboardData | null>(null);
 
     useEffect(() => {
         let active = true;
@@ -33,11 +37,19 @@ export default function RisksPage() {
             try {
                 setStatus("loading");
                 setMessage("");
-                const riskData = await getRisks();
+
+                const assessments = await getCurrentOrganizationAssessments();
+                const latestAssessment = assessments[0] ?? null;
+                const storedEvaluation = latestAssessment
+                    ? loadStoredEvaluation(latestAssessment.id)
+                    : null;
 
                 if (!active) return;
 
-                setRisks(riskData);
+                setAssessment(latestAssessment);
+                setDashboard(
+                    storedEvaluation ? buildEvaluationDashboard(storedEvaluation) : null
+                );
                 setStatus("ready");
             } catch (error) {
                 if (!active) return;
@@ -55,23 +67,13 @@ export default function RisksPage() {
         };
     }, []);
 
-    const counts = useMemo(
-        () =>
-            risks.reduce(
-                (accumulator, risk) => {
-                    accumulator[risk.severity] += 1;
-                    return accumulator;
-                },
-                { High: 0, Medium: 0, Low: 0 }
-            ),
-        [risks]
-    );
+    const risks = useMemo(() => dashboard?.risks ?? [], [dashboard]);
 
     return (
         <main className="app-main risks-page">
             <AppTopbar
                 title="Risks"
-                description="Track open risks, impact, likelihood, owners, and treatment status."
+                description="Track risks created from ISO 27001 assessment gaps."
             />
 
             {status === "loading" && <AppLoadingState title="Loading risks" />}
@@ -80,26 +82,33 @@ export default function RisksPage() {
                 <AppErrorState title="Could not load risks" message={message} />
             )}
 
-            {status === "ready" && !risks.length && (
+            {status === "ready" && (!assessment || !dashboard) && (
+                <AppEmptyState
+                    title="No assessment"
+                    message="Create an assessment before reviewing risk gaps."
+                />
+            )}
+
+            {status === "ready" && dashboard && !risks.length && (
                 <AppEmptyState
                     title="No open risks"
                     message="Risks appear when assessment answers identify control gaps."
                 />
             )}
 
-            {status === "ready" && risks.length > 0 && (
+            {status === "ready" && dashboard && risks.length > 0 && (
                 <>
                     <section className="app-page-grid">
                         <article className="app-card risk-card high-risk">
-                            <strong>{counts.High}</strong>
+                            <strong>{dashboard.riskCounts.High}</strong>
                             <span>High risks</span>
                         </article>
                         <article className="app-card risk-card medium-risk">
-                            <strong>{counts.Medium}</strong>
+                            <strong>{dashboard.riskCounts.Medium}</strong>
                             <span>Medium risks</span>
                         </article>
                         <article className="app-card risk-card low-risk">
-                            <strong>{counts.Low}</strong>
+                            <strong>{dashboard.riskCounts.Low}</strong>
                             <span>Low risks</span>
                         </article>
                     </section>
@@ -122,7 +131,11 @@ export default function RisksPage() {
                                         <td>{risk.title}</td>
                                         <td>{risk.owner}</td>
                                         <td>
-                                            <span className={`app-pill ${severityPill(risk.severity)}`}>
+                                            <span
+                                                className={`app-pill ${getPriorityPillClass(
+                                                    risk.severity
+                                                )}`}
+                                            >
                                                 {risk.severity}
                                             </span>
                                         </td>
