@@ -17,15 +17,63 @@ import {
     calculateEvaluationScore,
     companyProfileFields,
     evaluationSections,
-    reportQuestions,
     type EvaluationAnswer,
     type ProfileField,
-    type ReportQuestion,
     type StoredEvaluation,
 } from "@/lib/iso27001Evaluation";
 
 type PageStatus = "loading" | "ready" | "error";
 type SaveStatus = "idle" | "saving" | "success" | "error";
+type EvaluationCategory =
+    | "company_profile"
+    | "context_scope"
+    | "leadership"
+    | "risk_management"
+    | "support"
+    | "operation"
+    | "performance"
+    | "improvement"
+    | "organizational_controls"
+    | "people_controls"
+    | "physical_controls"
+    | "technological_controls";
+
+type CategoryDefinition = {
+    id: EvaluationCategory;
+    label: string;
+    sectionId?: string;
+};
+
+const categories: CategoryDefinition[] = [
+    { id: "company_profile", label: "Company profile" },
+    { id: "context_scope", label: "Context & scope", sectionId: "context-scope" },
+    { id: "leadership", label: "Leadership", sectionId: "leadership-governance" },
+    { id: "risk_management", label: "Risk management", sectionId: "risk-planning" },
+    { id: "support", label: "Support", sectionId: "support-documentation" },
+    { id: "operation", label: "Operation", sectionId: "operation" },
+    {
+        id: "performance",
+        label: "Performance",
+        sectionId: "performance-evaluation",
+    },
+    { id: "improvement", label: "Improvement", sectionId: "improvement" },
+    {
+        id: "organizational_controls",
+        label: "Organizational controls",
+        sectionId: "organizational-controls",
+    },
+    { id: "people_controls", label: "People controls", sectionId: "people-controls" },
+    {
+        id: "physical_controls",
+        label: "Physical controls",
+        sectionId: "physical-controls",
+    },
+    {
+        id: "technological_controls",
+        label: "Technological controls",
+        sectionId: "technological-controls",
+    },
+];
 
 const emptyEvaluation: StoredEvaluation = {
     profile: {},
@@ -180,32 +228,6 @@ function renderProfileInput(
     );
 }
 
-function renderReportInput(
-    question: ReportQuestion,
-    value: string,
-    onChange: (value: string) => void
-) {
-    if (question.type === "textarea") {
-        return (
-            <textarea
-                value={value}
-                onChange={(event) => onChange(event.target.value)}
-            />
-        );
-    }
-
-    const options = question.type === "yes-no" ? ["Yes", "No"] : question.options ?? [];
-
-    return (
-        <select value={value} onChange={(event) => onChange(event.target.value)}>
-            <option value="">Select</option>
-            {options.map((option) => (
-                <option key={option}>{option}</option>
-            ))}
-        </select>
-    );
-}
-
 export default function AssessmentsPage() {
     const [status, setStatus] = useState<PageStatus>("loading");
     const [saveStatus, setSaveStatus] = useState<SaveStatus>("idle");
@@ -216,6 +238,8 @@ export default function AssessmentsPage() {
     const [evaluation, setEvaluation] =
         useState<StoredEvaluation>(emptyEvaluation);
     const [creating, setCreating] = useState(false);
+    const [activeCategory, setActiveCategory] =
+        useState<EvaluationCategory>("company_profile");
 
     async function loadAssessments(preferredAssessmentId?: string) {
         try {
@@ -317,16 +341,6 @@ export default function AssessmentsPage() {
         });
     }
 
-    function updateReportValue(questionId: string, value: string) {
-        updateEvaluation({
-            ...evaluation,
-            report: {
-                ...evaluation.report,
-                [questionId]: value,
-            },
-        });
-    }
-
     function handleSaveEvaluation(event: FormEvent<HTMLFormElement>) {
         event.preventDefault();
 
@@ -354,6 +368,56 @@ export default function AssessmentsPage() {
         () => calculateEvaluationScore(evaluation.answers),
         [evaluation.answers]
     );
+    const activeCategoryIndex = categories.findIndex(
+        (category) => category.id === activeCategory
+    );
+    const currentCategory = categories[activeCategoryIndex] ?? categories[0];
+    const activeSection = currentCategory.sectionId
+        ? evaluationSections.find((section) => section.id === currentCategory.sectionId)
+        : null;
+    const categoryProgress = useMemo(() => {
+        return categories.reduce<Record<EvaluationCategory, { answered: number; total: number }>>(
+            (accumulator, category) => {
+                if (category.id === "company_profile") {
+                    const answered = companyProfileFields.filter((field) => {
+                        const value = evaluation.profile[field.id];
+
+                        return Array.isArray(value) ? value.length > 0 : Boolean(value);
+                    }).length;
+
+                    accumulator[category.id] = {
+                        answered,
+                        total: companyProfileFields.length,
+                    };
+                    return accumulator;
+                }
+
+                const section = evaluationSections.find(
+                    (sectionItem) => sectionItem.id === category.sectionId
+                );
+                const questions = section?.questions ?? [];
+
+                accumulator[category.id] = {
+                    answered: questions.filter((question) => evaluation.answers[question.id])
+                        .length,
+                    total: questions.length,
+                };
+
+                return accumulator;
+            },
+            {} as Record<EvaluationCategory, { answered: number; total: number }>
+        );
+    }, [evaluation.answers, evaluation.profile]);
+
+    function goToPreviousCategory() {
+        setActiveCategory(categories[Math.max(activeCategoryIndex - 1, 0)].id);
+    }
+
+    function goToNextCategory() {
+        setActiveCategory(
+            categories[Math.min(activeCategoryIndex + 1, categories.length - 1)].id
+        );
+    }
 
     return (
         <main className="app-main assessments-page">
@@ -413,8 +477,8 @@ export default function AssessmentsPage() {
                                 <div>
                                     <h2>ISO 27001 compliance evaluation</h2>
                                     <p className="app-muted-text">
-                                        Complete the company profile, answer readiness and Annex
-                                        A controls, and add report context.
+                                        Complete one category at a time. Your progress and score
+                                        update as answers are added.
                                     </p>
                                 </div>
                             </div>
@@ -439,43 +503,72 @@ export default function AssessmentsPage() {
                                 className="assessment-question-form"
                                 onSubmit={handleSaveEvaluation}
                             >
-                                <section className="assessment-section">
-                                    <div className="assessment-section-header">
-                                        <span>Part A</span>
-                                        <h3>Company profile</h3>
-                                        <p>
-                                            These fields are not scored. They provide context for
-                                            scope, recommendations, and reporting.
-                                        </p>
-                                    </div>
+                                <nav
+                                    className="assessment-category-nav"
+                                    aria-label="Assessment categories"
+                                >
+                                    {categories.map((category) => {
+                                        const progress = categoryProgress[category.id];
+                                        const isActive = category.id === activeCategory;
 
-                                    <div className="assessment-profile-grid">
-                                        {companyProfileFields.map((field) => (
-                                            <label
-                                                className="assessment-field-label"
-                                                key={field.id}
+                                        return (
+                                            <button
+                                                type="button"
+                                                key={category.id}
+                                                className={isActive ? "active" : ""}
+                                                onClick={() => setActiveCategory(category.id)}
                                             >
-                                                <span>
-                                                    {field.id}. {field.label}
-                                                </span>
-                                                {renderProfileInput(
-                                                    field,
-                                                    evaluation.profile[field.id],
-                                                    (value) => updateProfileValue(field.id, value)
-                                                )}
-                                            </label>
-                                        ))}
-                                    </div>
-                                </section>
+                                                <span>{category.label}</span>
+                                                <small>
+                                                    {progress?.answered ?? 0}/{progress?.total ?? 0}
+                                                </small>
+                                            </button>
+                                        );
+                                    })}
+                                </nav>
 
-                                {evaluationSections.map((section) => (
-                                    <section className="assessment-section" key={section.id}>
+                                <section className="assessment-section">
+                                    {currentCategory.id === "company_profile" ? (
+                                        <>
+                                            <div className="assessment-section-header">
+                                                <span>Category {activeCategoryIndex + 1} of {categories.length}</span>
+                                                <h3>Company profile</h3>
+                                                <p>
+                                                    These fields are not scored. They provide context for
+                                                    scope, recommendations, and reporting.
+                                                </p>
+                                            </div>
+
+                                            <div className="assessment-profile-grid">
+                                                {companyProfileFields.map((field) => (
+                                                    <label
+                                                        className="assessment-field-label"
+                                                        key={field.id}
+                                                    >
+                                                        <span>
+                                                            {field.id}. {field.label}
+                                                        </span>
+                                                        {renderProfileInput(
+                                                            field,
+                                                            evaluation.profile[field.id],
+                                                            (value) =>
+                                                                updateProfileValue(field.id, value)
+                                                        )}
+                                                    </label>
+                                                ))}
+                                            </div>
+                                        </>
+                                    ) : activeSection ? (
+                                        <>
                                         <div className="assessment-section-header">
-                                            <span>{section.group}</span>
-                                            <h3>{section.title}</h3>
+                                            <span>
+                                                Category {activeCategoryIndex + 1} of{" "}
+                                                {categories.length} · {activeSection.group}
+                                            </span>
+                                            <h3>{activeSection.title}</h3>
                                         </div>
 
-                                        {section.questions.map((question) => (
+                                        {activeSection.questions.map((question) => (
                                             <article
                                                 className="assessment-question-card"
                                                 key={question.id}
@@ -526,40 +619,27 @@ export default function AssessmentsPage() {
                                                 </label>
                                             </article>
                                         ))}
-                                    </section>
-                                ))}
-
-                                <section className="assessment-section">
-                                    <div className="assessment-section-header">
-                                        <span>Report context</span>
-                                        <h3>Extra questions for report generation</h3>
-                                        <p>
-                                            These fields are not scored, but make the gap report and
-                                            roadmap more useful.
-                                        </p>
-                                    </div>
-
-                                    <div className="assessment-profile-grid">
-                                        {reportQuestions.map((question) => (
-                                            <label
-                                                className="assessment-field-label"
-                                                key={question.id}
-                                            >
-                                                <span>
-                                                    {question.id}. {question.question}
-                                                </span>
-                                                <small>{question.purpose}</small>
-                                                {renderReportInput(
-                                                    question,
-                                                    evaluation.report[question.id] ?? "",
-                                                    (value) => updateReportValue(question.id, value)
-                                                )}
-                                            </label>
-                                        ))}
-                                    </div>
+                                        </>
+                                    ) : null}
                                 </section>
 
                                 <div className="assessment-form-actions">
+                                    <button
+                                        type="button"
+                                        className="assessment-secondary-button"
+                                        onClick={goToPreviousCategory}
+                                        disabled={activeCategoryIndex === 0}
+                                    >
+                                        Previous
+                                    </button>
+                                    <button
+                                        type="button"
+                                        className="assessment-secondary-button"
+                                        onClick={goToNextCategory}
+                                        disabled={activeCategoryIndex === categories.length - 1}
+                                    >
+                                        Next
+                                    </button>
                                     <button type="submit" disabled={saveStatus === "saving"}>
                                         {saveStatus === "saving"
                                             ? "Saving..."
