@@ -127,15 +127,23 @@
 }
 
 .support-modal-close {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
     width: 42px;
     height: 42px;
-    border: 1px solid var(--color-border);
+    min-height: 42px;
+    padding: 0;
+    border: 0;
     border-radius: 999px;
-    background: #ffffff;
-    color: var(--color-primary);
-    font-size: 1.4rem;
+    background: linear-gradient(135deg, var(--color-accent) 0%, #2f928d 100%);
+    color: #ffffff;
+    font: inherit;
+    font-size: 1.35rem;
     font-weight: 900;
+    line-height: 1;
     cursor: pointer;
+    box-shadow: 0 14px 34px rgba(58, 175, 169, 0.18);
 }
 
 .support-modal-form {

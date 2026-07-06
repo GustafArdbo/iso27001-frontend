@@ -21,7 +21,6 @@ import "../styles/dashboard/risks.css";
 import "../styles/dashboard/tasks.css";
 import "../styles/dashboard/reports.css";
 import "../styles/dashboard/settings.css";
-import "../styles/dashboard/support.css";
 
 import "../styles/admin/onboarding.css";
 
